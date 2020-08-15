@@ -1,0 +1,43 @@
+@model AuctionPortal.Models.View.LoginModel;
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    .center {
+}
+</style>
+
+<div class="row">
+    <div class="col-sm-12 text-center">
+        <h1 class="display-4">Log In</h1>
+    </div>
+</div>
+<hr>
+<br>
+<div class="row">
+    <div class="col-sm-4">
+
+    </div>
+    <div class="col-sm-4 center">
+        <form asp-controller="User" asp-action="Login" class="">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="returnUrl">
+            <div class="form-group">
+                <input asp-for="username" class="form-control" placeholder="Username">
+                <span asp-validation-for="username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="password" asp-for="password" class="form-control" placeholder="Password">
+                <span asp-validation-for="username" class="text-danger"></span>
+            </div>
+            <div class="form-group text-center">
+                <input type="submit" value="Log In" class="btn btn-primary">
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-4">
+
+    </div>
+</div>

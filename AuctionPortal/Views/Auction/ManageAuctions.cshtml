@@ -1,0 +1,37 @@
+@model IEnumerable<AuctionPortal.Models.Database.Auction>;
+
+@{
+    ViewData["Title"] = "Auction Management";
+}
+
+<div class="row">
+    <div class="col-sm-12">
+        <h1 class="display-4">Auctions</h1>
+        <br>
+        <table class="table text-center myTable">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.name)</th>
+                    <th>@Html.DisplayNameFor(model => model.state)</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    
+                        @if (item.state == AuctionPortal.Models.Database.Auction.AuctionState.DRAFT)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.name)</td>
+                                <td>DRAFT</td>
+                                <td>
+                                    <a class="btn btn-primary" asp-controller="Auction" asp-action="AdminDetails" asp-route-id="@item.id">Details</a>
+                                </td>
+                            </tr>
+                        }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+@model IEnumerable<AuctionPortal.Models.Database.User>;
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<link rel="stylesheet" href="~/css/site.css" />
+
+<div class="row">
+    <div class="col-sm-12">
+        <h1 class="display-4">Users</h1>
+        <br>
+        <table class="table myTable">
+            <thead class="text-center">
+                <tr>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.firstName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.lastName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.gender)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Email)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                @foreach (var item in Model)
+                {
+                    if(item.UserName != "admin" && item.active == true) {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UserName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.firstName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.lastName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.gender)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Email)
+                            </td>
+                            <td>
+                                <form class="form-inline" asp-controller="User" asp-action="DeleteUser" asp-route-id="@item.Id">
+                                    <input type="submit" class="btn btn-danger" value="Delete">
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

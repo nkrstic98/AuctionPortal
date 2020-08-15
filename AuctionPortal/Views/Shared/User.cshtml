@@ -1,0 +1,36 @@
+@using Microsoft.AspNetCore.Identity;
+@using AuctionPortal.Models.Database;
+
+@inject SignInManager<User> SignInManager;
+
+@{
+    string fullName = "";
+    foreach (System.Security.Claims.Claim claim in User.Claims)
+    {
+        if(claim.Type.Equals("fullName")) {
+            fullName = claim.Value;
+            break;
+        }
+    }
+}
+
+<ul class="navbar-nav">
+    @if(SignInManager.IsSignedIn(User)) {
+        <li class="nav-item pr-3">
+            <a class="nav-link text-dark" asp-controller="User" asp-action="AccDetails">@fullName</a>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline" asp-controller="User" asp-action="Logout">
+                <input type="submit" class="btn btn-outline-danger" value="Log Out">
+            </form>
+        </li>
+    }
+    else {
+        <li class="nav-item pr-3">
+            <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Log In</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
+        </li>
+    }
+</ul>

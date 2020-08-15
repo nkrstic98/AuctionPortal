@@ -1,0 +1,50 @@
+@model AuctionPortal.Models.Database.User;
+
+@{
+    ViewData["Title"] = "Account Details";
+}
+
+<div class="row">
+    <div class="col-sm-12">
+        <h1 class="display-4">@Model.firstName @Model.lastName</h1>
+    </div>
+</div>
+
+<hr>
+
+
+
+<div class="row">
+    <div class="col-sm-6">
+        <table class="table table-borderless">
+            <tbody>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.firstName)</th>
+                    <td>@Model.firstName</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.lastName)</th>
+                    <td>@Model.lastName</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.gender)</th>
+                    <td>@Model.gender</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Email)</th>
+                    <td>@Model.Email</td>
+                </tr>
+                <tr>
+                    <th>Username</th>
+                    <td>@Model.UserName</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.tokens)</th>
+                    <td>@Model.tokens</td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <a asp-controller="User" asp-action="ChangeDetails" class="btn btn-info">Change Account Details</a>
+    </div>
+</div>

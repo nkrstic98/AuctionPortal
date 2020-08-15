@@ -1,0 +1,53 @@
+@model AuctionPortal.Models.View.AddAuctionModel;
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1 class="display-4">Create Auction</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="Auction" asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <input asp-for="name" class="form-control" placeholder="@Html.DisplayNameFor(m => m.name)"/>
+                <span asp-validation-for="name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <textarea rows="4" cols="10" asp-for="description" class="form-control" placeholder="@Html.DisplayNameFor(m => m.description)"></textarea>
+                <span asp-validation-for="description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="custom-file">
+                    <label asp-for="file" class="control-label custom-file-label"></label>
+                    <input asp-for="file" class="form-control custom-file-input">
+                    <span asp-validation-for="file" class="text-danger"></span>
+                    <script>
+                    // Add the following code if you want the name of the file appear on select
+                    $(".custom-file-input").on("change", function() {
+                    var fileName = $(this).val().split("\\").pop();
+                    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                    });
+                    </script>
+                </div>
+            </div>
+            <div class="form-group">
+                <input asp-for="startingPrice" class="form-control" placeholder="@Html.DisplayNameFor(m => m.startingPrice)" />
+                <span asp-validation-for="startingPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="text" asp-for="openingDateTime" class="form-control" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="@Html.DisplayNameFor(m => m.openingDateTime)" />
+                <span asp-validation-for="openingDateTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="text" asp-for="closingDateTime" class="form-control" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="@Html.DisplayNameFor(m => m.closingDateTime)" />
+                <span asp-validation-for="closingDateTime" class="text-danger"></span>
+            </div>
+            <br>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

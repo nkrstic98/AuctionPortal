@@ -1,0 +1,59 @@
+@model AuctionPortal.Models.View.RegisterModel;
+
+@{
+    ViewData["Title"] = "Change account details";
+}
+
+<div class="row">
+    <div class="col-sm-12">
+        <h1 class="display-4">@Model.firstName @Model.lastName</h1>
+    </div>
+</div>
+
+<hr>
+
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-6">
+        <form asp-controller="User" asp-action="ChangeDetails">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <input asp-for="firstName" class="form-control" placeholder="First name" />
+                <span asp-validation-for="firstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input asp-for="lastName" class="form-control" placeholder="Last name" />
+                <span asp-validation-for="lastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">  
+                <select asp-for="gender" class="custom-select">  
+                    <option value="">Choose Gender</option>  
+                    <option value="Male">Male</option>  
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="gender" class="text-danger"></span>
+            </div>  
+            <div class="form-group">
+                <input asp-for="email" class="form-control" placeholder="Email" />
+                <span asp-validation-for="email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input asp-for="username" class="form-control" placeholder="Username" />
+                <span asp-validation-for="username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input asp-for="password" class="form-control" placeholder="Password" />
+                <span asp-validation-for="password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input asp-for="confirmPassword" class="form-control" placeholder="Confirm password" />
+                <span asp-validation-for="confirmPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group text-center">
+                <input type="submit" value="Update" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-3"></div>
+</div>
