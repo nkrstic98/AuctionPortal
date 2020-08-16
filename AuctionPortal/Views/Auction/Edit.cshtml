@@ -1,16 +1,14 @@
-@model AuctionPortal.Models.Database.Auction
+@model AuctionPortal.Models.View.EditAuction;
 
 @{
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
-
-<h4>Auction</h4>
+<h1 class="display-4">Edit Auction Details</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="id" />
             <div class="form-group">
@@ -20,23 +18,29 @@
             </div>
             <div class="form-group">
                 <label asp-for="description" class="control-label"></label>
-                <input asp-for="description" class="form-control" />
+                <textarea rows="4" cols="10" asp-for="description" class="form-control"></textarea>
                 <span asp-validation-for="description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="imageId" class="control-label"></label>
-                <select asp-for="imageId" class="form-control" asp-items="ViewBag.imageId"></select>
-                <span asp-validation-for="imageId" class="text-danger"></span>
+                <div class="custom-file">
+                    <label asp-for="file" class="control-label custom-file-label"></label>
+                    <input asp-for="file" class="form-control custom-file-input">
+                    <span asp-validation-for="file" class="text-danger"></span>
+                    @section scripts {
+                        <script>
+                        // Add the following code if you want the name of the file appear on select
+                        $(".custom-file-input").on("change", function() {
+                        var fileName = $(this).val().split("\\").pop();
+                        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                        });
+                    </script>
+                    }
+                </div>
             </div>
             <div class="form-group">
                 <label asp-for="startingPrice" class="control-label"></label>
                 <input asp-for="startingPrice" class="form-control" />
                 <span asp-validation-for="startingPrice" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="creationDateTime" class="control-label"></label>
-                <input asp-for="creationDateTime" class="form-control" />
-                <span asp-validation-for="creationDateTime" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="openingDateTime" class="control-label"></label>
@@ -49,16 +53,6 @@
                 <span asp-validation-for="closingDateTime" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="state" class="control-label"></label>
-                <select asp-for="state" class="form-control"></select>
-                <span asp-validation-for="state" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="accession" class="control-label"></label>
-                <input asp-for="accession" class="form-control" />
-                <span asp-validation-for="accession" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -66,6 +60,6 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="MyAuctions">Back to List</a>
 </div>
 

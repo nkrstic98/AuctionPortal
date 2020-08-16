@@ -144,6 +144,18 @@ namespace AuctionPortal.Controllers
                 return View(model);
             }
 
+            IList<Auction> auctions = await this._context.auctions.Where(a => a.name == model.name).ToListAsync();
+
+            if(auctions != null) {
+                foreach (Auction a in auctions)
+                {
+                    if(a.state != Auction.AuctionState.DELETED)  {
+                        ModelState.AddModelError("", "Auction with that name already exists");
+                        return View(model);
+                    }
+                }
+            }
+
             Image image;
 
             using(BinaryReader reader = new BinaryReader(model.file.OpenReadStream())) {
@@ -213,8 +225,15 @@ namespace AuctionPortal.Controllers
             {
                 return NotFound();
             }
-            ViewData["imageId"] = new SelectList(_context.images, "id", "id", auction.imageId);
-            return View(auction);
+
+            return View(new EditAuction() {
+                id = auction.id,
+                name = auction.name,
+                description = auction.description,
+                startingPrice = auction.startingPrice,
+                openingDateTime = auction.openingDateTime,
+                closingDateTime = auction.closingDateTime
+            });
         }
 
         // POST: Auction/Edit/5
@@ -222,35 +241,39 @@ namespace AuctionPortal.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("id,name,description,imageId,startingPrice,creationDateTime,openingDateTime,closingDateTime,state,accession")] Auction auction)
+        public async Task<IActionResult> Edit(EditAuction model)
         {
-            if (id != auction.id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(auction);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AuctionExists(auction.id))
-                    {
-                        return NotFound();
+                Auction auction = await this._context.auctions.FindAsync(model.id);
+
+                auction.name = model.name;
+                auction.description = model.description;
+                auction.startingPrice = model.startingPrice;
+                auction.openingDateTime = model.openingDateTime;
+                auction.closingDateTime = model.closingDateTime;
+
+                if(model.file != null) {
+                    Console.WriteLine("Fajl nije null");
+                    Console.WriteLine(model.file);
+
+                    Image image = await this._context.images.FindAsync(auction.imageId);
+
+                    using(BinaryReader reader = new BinaryReader(model.file.OpenReadStream())) {
+                        image.data = reader.ReadBytes(Convert.ToInt32(reader.BaseStream.Length));
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    auction.image = image;
+
+                    this._context.images.Update(image);
                 }
-                return RedirectToAction(nameof(Index));
+
+                this._context.auctions.Update(auction);
+                await this._context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(AuctionController.MyAuctions), "Auction");
             }
-            ViewData["imageId"] = new SelectList(_context.images, "id", "id", auction.imageId);
-            return View(auction);
+            return View(model);
         }
 
         public async Task<IActionResult> ManageAuctions()
