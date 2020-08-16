@@ -1,0 +1,73 @@
+@model IEnumerable<AuctionPortal.Models.View.AuctionView>;
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                Starting price
+            </th>
+            <th>
+                Creation date and time
+            </th>
+            <th>
+                Opening date and time
+            </th>
+            <th>
+                Closing date and time
+            </th>
+            <th>
+                State
+            </th>
+            <th>
+                Accession
+            </th>
+            <th>
+                Image
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.startingPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.creationDateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.openingDateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.closingDateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.state)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.auction.accession)
+            </td>
+            <td>
+                <img src="data:image/png;base64,@item.base64Data" / style="height: 150px; width: 150px;">
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.auction.id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.auction.id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.auction.id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

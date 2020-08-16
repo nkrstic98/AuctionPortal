@@ -238,5 +238,52 @@ namespace AuctionPortal.Controllers {
 
             return RedirectToAction ( nameof ( UserController.ManageUsers ) );
         }
+
+        public async Task<IActionResult> PurchaseTokens() {
+            IList<Token> tokens = await this.context.tokens.ToListAsync();
+
+            return View(tokens);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PurchaseTokens(Purchase model) {
+            if(!ModelState.IsValid) {
+                return View(model);
+            }
+
+            User loggedInUser = await this.userManager.GetUserAsync(base.User);
+
+            Token token = this.context.tokens.Where(t => t.ammount == model.amount).FirstOrDefault();
+
+            DateTime today = DateTime.Now;
+
+            Order order = new Order() {
+                userId = loggedInUser.Id,
+                user = loggedInUser,
+                date = today,
+                tokenAmmout = model.amount,
+                price = token.price
+            };
+
+            if(loggedInUser.orderList == null) {
+                loggedInUser.orderList = new List<Order>();
+            }
+
+            loggedInUser.orderList.Add(order);
+
+            loggedInUser.tokens += model.amount;
+
+            this.context.Users.Update(loggedInUser);
+            this.context.orders.Update(order);
+            await this.context.SaveChangesAsync();
+
+            OrderConfirm confirm = new OrderConfirm() {
+                order = order,
+                newAmount = loggedInUser.tokens
+            };
+
+            return PartialView("OrderConfirmation", confirm);
+        }
     }
 }

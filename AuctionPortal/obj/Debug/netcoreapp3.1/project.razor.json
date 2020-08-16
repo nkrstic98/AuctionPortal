@@ -14206,6 +14206,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\User\\PurchaseTokens.cshtml",
+      "TargetPath": "Views\\User\\PurchaseTokens.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\User\\ChangeDetails.cshtml",
       "TargetPath": "Views\\User\\ChangeDetails.cshtml",
       "FileKind": "mvc"
@@ -14241,6 +14246,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\Auction\\AuctionList.cshtml",
+      "TargetPath": "Views\\Auction\\AuctionList.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
       "TargetPath": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
       "FileKind": "mvc"
@@ -14273,6 +14283,11 @@
     {
       "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\User\\Login.cshtml",
       "TargetPath": "Views\\User\\Login.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\User\\OrderConfirmation.cshtml",
+      "TargetPath": "Views\\User\\OrderConfirmation.cshtml",
       "FileKind": "mvc"
     },
     {

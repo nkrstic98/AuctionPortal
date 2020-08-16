@@ -418,3 +418,6 @@ C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\User\M
 C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auction\AdminDetails.cshtml.g.cs
 C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auction\Details.cshtml.g.cs
 C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auction\MyAuctions.cshtml.g.cs
+C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\User\PurchaseTokens.cshtml.g.cs
+C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auction\AuctionList.cshtml.g.cs
+C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\User\OrderConfirmation.cshtml.g.cs

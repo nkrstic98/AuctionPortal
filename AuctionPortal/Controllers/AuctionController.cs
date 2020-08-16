@@ -41,16 +41,14 @@ namespace AuctionPortal.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var auctionPortalContext = _context.auctions;
+            var auctionPortalContext = this._context.auctions;
 
-            IList<Auction> list = await auctionPortalContext.ToListAsync();
+            IList<Auction> list = await auctionPortalContext.OrderByDescending(a => a.openingDateTime).ToListAsync();
             IList<AuctionView> auctionList = new List<AuctionView>();
 
-            int i = 0;
-
-            foreach(var el in list) {
-                AuctionView data = await this.GetImageView(el.id);
-                i++;
+            foreach (var el in list)
+            {
+                AuctionView data = await this.GetImageView(el.imageId);
                 data.auction = el;
                 auctionList.Add(data);
             }
@@ -62,29 +60,71 @@ namespace AuctionPortal.Controllers
             return View(searchModel);
         }
 
-        /*[HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Index (SearchModel model) {
-            if(!ModelState.IsValid) {
-                return View(model);
+        public async Task<IActionResult> Search(SearchModel model)
+        {
+            Console.WriteLine("Pozvali smo search funkciju");
+            
+            Console.WriteLine(model.name);
+            
+            Console.WriteLine(model.minPrice);
+            
+            Console.WriteLine(model.maxPrice);
+            
+            Console.WriteLine(model.state);
+
+            IQueryable<Auction> query = this._context.auctions;
+
+            if(model.name != null) {
+                Console.WriteLine(model.name);
+                query = query.Where(auction => auction.name == model.name);
             }
 
-            if(model.name == "" && model.state ==  && model.minPrice == "" && model.maxPrice == "") {
-                return View(model);
+            if(model.minPrice != null) {
+                Console.WriteLine(model.minPrice);
+                query = query.Where(auction => auction.startingPrice + auction.accession >= int.Parse(model.minPrice));
             }
 
-            IList<AuctionView> auctionList = new List<AuctionView>();
+            if(model.maxPrice != null) {
+                Console.WriteLine(model.maxPrice);
+                query = query.Where(auction => auction.startingPrice + auction.accession <= int.Parse(model.maxPrice));
+            }
 
-            if(model.name != "") {
-                foreach (var a in model.auctionList)
+            if(model.state != null) {
+                Console.WriteLine(model.state);
+                switch(model.state)
                 {
-                    if(a.auction.name == model.name) {
-                        auctionList.Add(a);
-                    }
+                    case "1": query = query.Where(auction => auction.state == Auction.AuctionState.DRAFT);
+                            break;
+                    case "2": query = query.Where(auction => auction.state == Auction.AuctionState.READY);
+                            break;
+                    case "3": query = query.Where(auction => auction.state == Auction.AuctionState.OPEN);
+                            break;
+                    case "4": query = query.Where(auction => auction.state == Auction.AuctionState.SOLD);
+                            break;
+                    case "5": query = query.Where(auction => auction.state == Auction.AuctionState.EXPIRED);
+                            break;
+                    case "6": query = query.Where(auction => auction.state == Auction.AuctionState.DELETED);
+                            break;
                 }
             }
-        }*/
+
+            IList<Auction> auctions = await query.OrderByDescending(auction => auction.openingDateTime).ToListAsync();
+
+            IList<AuctionView> auctionViews = new List<AuctionView>();
+
+            foreach (Auction a in auctions)
+            {
+                AuctionView av = await this.GetImageView(a.imageId);
+                av.auction = a;
+
+                auctionViews.Add(av);
+            }
+
+            return PartialView("AuctionList", auctionViews);
+        }
 
         // GET: Auction/AdminDetails/5
         public async Task<IActionResult> AdminDetails(int? id)
@@ -196,10 +236,6 @@ namespace AuctionPortal.Controllers
 
             if(user.auctionList == null) {
                 user.auctionList = new List<Auction>();
-                Console.WriteLine("Empty list");
-            }
-            else {
-                Console.WriteLine("Not empty list");
             }
 
             user.auctionList.Add(auction);

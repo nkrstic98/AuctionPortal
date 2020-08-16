@@ -1,0 +1,14 @@
+@model AuctionPortal.Models.View.OrderConfirm;
+
+<br>
+<hr>
+<div>
+    <h1>Order confirmation:</h1>
+    <br>
+    <h5>Date: @Model.order.date</h5>
+    <br>
+    <h3>Price: @Model.order.price USD</h3>
+    <h4>Order details: @Model.order.tokenAmmout Tokens</h4>
+    <hr>
+    <h4 style="color: red;">New token amount: <b>@Model.newAmount</b></h4>
+</div>

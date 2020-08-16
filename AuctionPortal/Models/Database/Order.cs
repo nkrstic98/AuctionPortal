@@ -10,7 +10,7 @@ namespace AuctionPortal.Models.Database {
 
         [Required]
         [Display(Name = "Buyer")]
-        public int userId { get; set; }
+        public string userId { get; set; }
 
         [Required]
         [Display(Name = "Buyer")]

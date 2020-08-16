@@ -1,0 +1,98 @@
+@model IEnumerable<AuctionPortal.Models.Database.Token>
+
+@{
+    ViewData["Title"] = "Purchase Tokens";
+}
+
+<script src="https://www.paypal.com/sdk/js?client-id=ARY0Db1HprxCf4woQ_m8q2rINnvFfsQB7aqK6Z2pP9yEFwu2jRBA5EtVF9ceST7TypnIW4Qqhu3TE36E"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="~/css/site.css" />
+
+<div class="container">
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Your order</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+            <h3 id="package"></h3>
+            <h4 id="price"></h4>
+            <h5 id="tokens"></h5>
+            <br>
+            <hr>
+            <br>
+            <div id="paypal"></div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<h1 class="display-4">Please, choose your package</h1>
+<br>
+<br>
+
+<div class="row">
+    @foreach (var t in Model)
+    {
+        <div class="columns">
+            <ul class="price">
+                <li class="header"><h4 class="display-4">@t.package</h4></li>
+                <li class="grey"><b>@t.price</b> USD</li>
+                <li class="grey" style="background-color: white;"><b>@t.ammount TOKENS</b></li>
+                <li class="grey"><button href="#" class="btn btn-lg btn-success" onclick="setAmount('@t.price', '@t.package', '@t.ammount')" data-toggle="modal" data-target="#myModal">BUY</button></li>
+            </ul>
+        </div>
+    }
+</div>
+
+<div id="orderConfirmation">
+
+</div>
+
+<script>
+    var amount = "";
+    var numTokens = "";
+
+    function setAmount(price, package, amm) {
+        amount = price;
+        numTokens = amm;
+        $("#package").text(package + " package");
+        $("#price").text("Price: " + price + " USD");
+        $("#tokens").text("Tokens: " + amm);
+    }
+
+    paypal.Buttons ( {
+        createOrder: function ( data, actions ) {
+            if(amount == "") {
+            }
+            return actions.order.create ( {
+                purchase_units: [{
+                    amount: {
+                        currency_code: "USD",
+                        value: amount
+                    }
+                }]
+            } )
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(
+                function(details) {
+                    $("#myModal").modal('hide');
+                    alert(details.payer.name.given_name + ", your transacton was successful!");
+                    purchaseTokens(numTokens);
+                }
+            )
+        }
+    } ).render ( "#paypal" )
+</script>
+
