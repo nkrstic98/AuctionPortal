@@ -3,10 +3,9 @@
 
 // Write your JavaScript code.
 
-
-function updateTimer ( ) {
-    // document.getElementById ( "timer" )
-    var string = $("#timer").text ( )
+function updateTimer() {
+    id = "#timer";
+    var string = $(id).text ( )
 
     var array = string.split ( ":" )
 
@@ -32,11 +31,12 @@ function updateTimer ( ) {
         hours = "0" + hours;
     }
 
-    $("#timer").text ( hours + ":" + minutes + ":" + seconds );
+    $(id).text ( hours + ":" + minutes + ":" + seconds );
+
+    setTimeout(updateTimer, 1000);
 }
 
-setInterval(updateTimer, 1000);
-
+setTimeout(updateTimer, 1000);
 
 function filter() {
     var auctionName = $("#auctionName").val();
@@ -57,6 +57,38 @@ function filter() {
         },
         dataType: "text",
         success: function(response) {
+            for(let i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i]);
+            }
+            intervals = [];
+            $("#auctions").html(response);
+        },
+        error: function(response) {
+            alert(response);
+        }
+    }
+    )
+}
+
+function noFilters() {
+    var verificationToken = $("input[name='__RequestVerificationToken']").val();
+
+    $.ajax({
+        type: "POST",
+        url: "/Auction/Search",
+        data: {
+            "name": "",
+            "minPrice": "",
+            "maxPrice": "",
+            "state": "",
+            "__RequestVerificationToken": verificationToken
+        },
+        dataType: "text",
+        success: function(response) {
+            for(let i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i]);
+            }
+            intervals = [];
             $("#auctions").html(response);
         },
         error: function(response) {

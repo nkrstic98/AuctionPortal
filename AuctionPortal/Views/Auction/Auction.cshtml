@@ -1,0 +1,53 @@
+@model AuctionPortal.Models.View.AuctionView;
+
+@{
+    string timerId = "timer" + @Model.auction.id;
+}
+
+<div class="card text-center">
+    <div class="card-header"><a asp-action="Details" asp-route-id="@Model.auction.id">@Model.auction.name</a></div>
+    <div class="card-body">
+        <img src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
+        <h4 id="@timerId">@Model.remainingTime</h4>
+        <h4>$ @Model.auction.accession</h4>
+        <!--Dodati korisnika koji je poslednji licitirao-->
+    </div> 
+    <div class="card-footer"><button class="btn btn-warning">BID</button></div>
+</div>
+
+<script>
+    function updateTimer() {
+        id = "#" + "@timerId";
+        var string = $(id).text ( )
+
+        var array = string.split ( ":" )
+
+        var hours = parseInt ( array[0] );
+        var minutes = parseInt ( array[1] );
+        var seconds = parseInt ( array[2] );
+
+        var timeInSeconds = hours * 3600 + minutes * 60 + seconds - 1;
+
+        seconds = timeInSeconds % 60;
+        minutes = Math.floor ( timeInSeconds / 60 ) % 60;
+        hours = Math.floor ( timeInSeconds / 3600 );
+
+        if ( seconds < 10 ) {
+            seconds = "0" + seconds;
+        }
+
+        if ( minutes < 10 ) {
+            minutes = "0" + minutes;
+        }
+
+        if ( hours < 10 ) {
+            hours = "0" + hours;
+        }
+
+        $(id).text ( hours + ":" + minutes + ":" + seconds );
+    }
+
+    v = setInterval(updateTimer, 1000);
+
+    intervals.push(v);
+</script>

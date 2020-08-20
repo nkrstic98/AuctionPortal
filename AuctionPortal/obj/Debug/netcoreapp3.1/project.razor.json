@@ -14221,6 +14221,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\Auction\\Auction.cshtml",
+      "TargetPath": "Views\\Auction\\Auction.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\_ViewStart.cshtml",
       "TargetPath": "Views\\_ViewStart.cshtml",
       "FileKind": "mvc"

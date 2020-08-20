@@ -6,8 +6,8 @@
 
 <div class="row">
     <div class="col-sm-12">
-        <form asp-controller="Auction" asp-action="Search" class="form-inline align-items-center">
-            <div class="form-group mr-3 ml-5 pl-3">
+        <form asp-controller="Auction" asp-action="Search" class="form-inline justify-content-center">
+            <div class="form-group mr-3">
                 <input id="auctionName" type="text" value="" asp-for="name" class="form-control" placeholder="Auction name"/>
             </div>
             <div class="form-group mr-3">
@@ -28,8 +28,11 @@
                     <option value="6">DELETED</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group mr-3">
                 <button type="button" class="btn btn-primary" onclick="filter()">Search</button>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-outline-primary" onclick="noFilters()">No Filters</button>
             </div>
         </form>
     </div>
@@ -37,7 +40,7 @@
 
 <br>
 
-<div id="auctions">
+<div class="row" id="auctions">
     @{
         await Html.RenderPartialAsync("AuctionList", Model.auctionList);
     }

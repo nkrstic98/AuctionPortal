@@ -5,5 +5,6 @@ namespace AuctionPortal.Models.View {
     public class AuctionView {
         public string base64Data { get; set; }
         public Auction auction { get; set; }
+        public string remainingTime { get; set; }
     }
 }

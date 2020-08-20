@@ -37,6 +37,18 @@ namespace AuctionPortal.Controllers
             return model;
         }
 
+        public string GetRemainingTime(TimeSpan diff) {
+            double seconds = Math.Floor((diff.TotalMilliseconds / 1000) % 60);
+            double minutes = Math.Floor((diff.TotalMilliseconds / (1000 * 60)) % 60);
+            double hours = Math.Floor((diff.TotalMilliseconds / (1000 * 60 * 60)) %24);
+
+            string h = (hours < 10) ? "0" + hours.ToString() : hours.ToString();
+            string m = (minutes < 10) ? "0" + minutes.ToString() : minutes.ToString();
+            string s = (seconds < 10) ? "0" + seconds.ToString() : seconds.ToString();
+            
+            return h + ":" + m + ":" + s;
+        }
+
         // GET: Auction
         [AllowAnonymous]
         public async Task<IActionResult> Index()
@@ -49,7 +61,13 @@ namespace AuctionPortal.Controllers
             foreach (var el in list)
             {
                 AuctionView data = await this.GetImageView(el.imageId);
+
+                TimeSpan diff = el.closingDateTime - DateTime.Now;
+
+                data.remainingTime = this.GetRemainingTime(diff);
+
                 data.auction = el;
+                
                 auctionList.Add(data);
             }
 
@@ -65,35 +83,21 @@ namespace AuctionPortal.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Search(SearchModel model)
         {
-            Console.WriteLine("Pozvali smo search funkciju");
-            
-            Console.WriteLine(model.name);
-            
-            Console.WriteLine(model.minPrice);
-            
-            Console.WriteLine(model.maxPrice);
-            
-            Console.WriteLine(model.state);
-
             IQueryable<Auction> query = this._context.auctions;
 
             if(model.name != null) {
-                Console.WriteLine(model.name);
                 query = query.Where(auction => auction.name == model.name);
             }
 
             if(model.minPrice != null) {
-                Console.WriteLine(model.minPrice);
                 query = query.Where(auction => auction.startingPrice + auction.accession >= int.Parse(model.minPrice));
             }
 
             if(model.maxPrice != null) {
-                Console.WriteLine(model.maxPrice);
                 query = query.Where(auction => auction.startingPrice + auction.accession <= int.Parse(model.maxPrice));
             }
 
             if(model.state != null) {
-                Console.WriteLine(model.state);
                 switch(model.state)
                 {
                     case "1": query = query.Where(auction => auction.state == Auction.AuctionState.DRAFT);
@@ -118,6 +122,11 @@ namespace AuctionPortal.Controllers
             foreach (Auction a in auctions)
             {
                 AuctionView av = await this.GetImageView(a.imageId);
+
+                TimeSpan diff = a.closingDateTime - DateTime.Now;
+                
+                av.remainingTime = this.GetRemainingTime(diff);
+
                 av.auction = a;
 
                 auctionViews.Add(av);
