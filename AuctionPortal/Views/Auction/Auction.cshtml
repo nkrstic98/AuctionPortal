@@ -1,7 +1,18 @@
 @model AuctionPortal.Models.View.AuctionView;
 
+@using Microsoft.AspNetCore.Identity;
+@using AuctionPortal.Models.Database;
+
+@inject SignInManager<User> SignInManager;
+@inject UserManager<User> UserManager;
+
 @{
-    string timerId = "timer" + @Model.auction.id;
+    await Html.RenderPartialAsync ("SignalRScriptsPartial");
+}
+
+@{
+    string timerId = "timer" + Model.auction.id;
+    string auctionId = "auction" + Model.auction.id;
 }
 
 <div class="card text-center">
@@ -11,12 +22,14 @@
         <h4 id="@timerId">@Model.remainingTime</h4>
         <h4>$ @Model.auction.accession</h4>
         <!--Dodati korisnika koji je poslednji licitirao-->
-    </div> 
-    <div class="card-footer"><button class="btn btn-warning">BID</button></div>
+    </div>
+    @if(SignInManager.IsSignedIn(User)) {
+        <div class="card-footer"><button class="btn btn-warning" onclick="bid(@Model.auction.id)">BID</button></div>
+    }
 </div>
 
 <script>
-    function updateTimer() {
+    v = setInterval(function() {
         id = "#" + "@timerId";
         var string = $(id).text ( )
 
@@ -32,6 +45,10 @@
         minutes = Math.floor ( timeInSeconds / 60 ) % 60;
         hours = Math.floor ( timeInSeconds / 3600 );
 
+        if(seconds == 0 && minutes == 0 && hours == 0) {
+            closeAuction(@Model.auction.id);
+        }
+
         if ( seconds < 10 ) {
             seconds = "0" + seconds;
         }
@@ -45,9 +62,12 @@
         }
 
         $(id).text ( hours + ":" + minutes + ":" + seconds );
-    }
+    }, 1000);
 
-    v = setInterval(updateTimer, 1000);
+    object = {
+        interval: v,
+        auctionId: @Model.auction.id
+    };
 
-    intervals.push(v);
+    intervals.push(object);
 </script>

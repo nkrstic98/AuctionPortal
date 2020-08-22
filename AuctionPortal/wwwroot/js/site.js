@@ -3,40 +3,13 @@
 
 // Write your JavaScript code.
 
-function updateTimer() {
-    id = "#timer";
-    var string = $(id).text ( )
+var connection =  new signalR.HubConnectionBuilder().withUrl("/update").build();
 
-    var array = string.split ( ":" )
-
-    var hours = parseInt ( array[0] );
-    var minutes = parseInt ( array[1] );
-    var seconds = parseInt ( array[2] );
-
-    var timeInSeconds = hours * 3600 + minutes * 60 + seconds + 1;
-
-    seconds = timeInSeconds % 60;
-    minutes = Math.floor ( timeInSeconds / 60 ) % 60;
-    hours = Math.floor ( timeInSeconds / 3600 );
-
-    if ( seconds < 10 ) {
-        seconds = "0" + seconds;
-    }
-
-    if ( minutes < 10 ) {
-        minutes = "0" + minutes;
-    }
-
-    if ( hours < 10 ) {
-        hours = "0" + hours;
-    }
-
-    $(id).text ( hours + ":" + minutes + ":" + seconds );
-
-    setTimeout(updateTimer, 1000);
+function handleError(error) {
+    alert(error);
 }
 
-setTimeout(updateTimer, 1000);
+connection.start().catch(handleError);
 
 function filter() {
     var auctionName = $("#auctionName").val();
@@ -58,7 +31,7 @@ function filter() {
         dataType: "text",
         success: function(response) {
             for(let i = 0; i < intervals.length; i++) {
-                clearInterval(intervals[i]);
+                clearInterval(intervals[i].interval);
             }
             intervals = [];
             $("#auctions").html(response);
@@ -68,6 +41,32 @@ function filter() {
         }
     }
     )
+}
+
+function closeAuction(auctionId) {
+    var verificationToken = $("input[name='__RequestVerificationToken']").val();
+
+    $.ajax({
+        type: "POST",
+        url: "/Auction/closeAuction",
+        data: {
+            "auctionId": auctionId,
+            "__RequestVerificationToken": verificationToken
+        },
+        dataType: "text",
+        success: function(response) {
+            for(let i = 0; i < intervals.length; i++) {
+                if(intervals[i].auctionId == auctionId) {
+                    clearInterval(intervals[i].interval);
+                }
+            }
+            id = "#auction" + auctionId;
+            $(id).html(response);
+        },
+        error: function(response) {
+            alert(response);
+        }
+    })
 }
 
 function noFilters() {
@@ -86,7 +85,7 @@ function noFilters() {
         dataType: "text",
         success: function(response) {
             for(let i = 0; i < intervals.length; i++) {
-                clearInterval(intervals[i]);
+                clearInterval(intervals[i].interval);
             }
             intervals = [];
             $("#auctions").html(response);
@@ -117,3 +116,52 @@ function purchaseTokens(amount) {
         }
     })
 }
+
+function bid(auctionId) {
+    auctionID = auctionId;
+
+    var verificationToken = $("input[name='__RequestVerificationToken']").val();
+
+    $.ajax({
+        type: "POST",
+        url: "/Auction/Bid",
+        data: {
+            "auctionId": auctionId,
+            "__RequestVerificationToken": verificationToken
+        },
+        success: function(response) {
+            for(let i = 0; i < intervals.length; i++) {
+                if(intervals[i].auctionId == auctionId) {
+                    clearInterval(intervals[i].interval);
+                }
+            }
+            connection.invoke("Bid", auctionId).catch(handleError);
+        },
+        error: function(response) {
+            alert(response);
+        }
+    })
+}
+
+connection.on (
+    "UpdateAuction",
+    (auctionId) => {
+        $.ajax({
+            type: "GET",
+            url: "/Auction/GetAuction?auctionId=" + auctionId,
+            dataType: "text",
+            success: function(response) {
+                for(let i = 0; i < intervals.length; i++) {
+                    if(intervals[i].auctionId == auctionId) {
+                        clearInterval(intervals[i].interval);
+                    }
+                }
+                let divId = "#auction" + auctionId;
+                $(divId).html(response);
+            },
+            error: function(response) {
+                alert(response);
+            }
+        })
+    }
+)

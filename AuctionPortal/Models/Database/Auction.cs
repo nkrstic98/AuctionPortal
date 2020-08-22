@@ -43,7 +43,7 @@ namespace AuctionPortal.Models.Database {
         
         [Required]
         [Display(Name = "Starting price")]
-        public int startingPrice { get; set; }
+        public double startingPrice { get; set; }
 
         [Required]
         [Display(Name = "Creation date")]
@@ -65,7 +65,7 @@ namespace AuctionPortal.Models.Database {
         public ICollection<Bid> biddingList { get; set; }
 
         [Display(Name = "Total accession ammout")]
-        public int accession { get; set; } //ukupno povecanje cene
+        public double accession { get; set; } //ukupno povecanje cene
     }
 
     public class AuctionConfiguration : IEntityTypeConfiguration<Auction>

@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AuctionPortal.Hubs;
 
 namespace AuctionPortal
 {
@@ -58,6 +59,8 @@ namespace AuctionPortal
 
             services.AddScoped<IUserClaimsPrincipalFactory<User>, ClaimFactory>();
 
+            services.AddSignalR();
+
             services.AddControllersWithViews();
         }
 
@@ -86,6 +89,7 @@ namespace AuctionPortal
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<BiddingHub>("/update");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Auction}/{action=Index}/{id?}");

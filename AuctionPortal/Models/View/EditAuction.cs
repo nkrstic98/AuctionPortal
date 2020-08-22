@@ -20,7 +20,7 @@ namespace AuctionPortal.Models.View {
         
         [Required]
         [Display(Name = "Price")]
-        public int startingPrice { get; set; }
+        public double startingPrice { get; set; }
         [Required]
         [Display(Name = "Opening date and time")]
         public DateTime openingDateTime { get; set; }

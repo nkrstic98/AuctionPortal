@@ -1,7 +1,20 @@
 @model AuctionPortal.Models.View.SearchModel;
 
+@using Microsoft.AspNetCore.Identity;
+@using AuctionPortal.Models.Database;
+
+@inject SignInManager<User> SignInManager;
+@inject UserManager<User> UserManager;
+
 @{
     ViewData["Title"] = "Home";
+}
+
+@if(!SignInManager.IsSignedIn(User)) {
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>WARNING!</strong> You cannot bid on auctions unless you are logged in.
+        </div>
 }
 
 <div class="row">
@@ -38,6 +51,8 @@
     </div>
 </div>
 
+<br>
+<hr>
 <br>
 
 <div class="row" id="auctions">

@@ -1,10 +1,17 @@
 @model IEnumerable<AuctionPortal.Models.View.AuctionView>;
 
+@{
+    string auctionId = "";
+}
+
+@{
+    await Html.RenderPartialAsync ("SignalRScriptsPartial");
+}
 
 @foreach (var item in Model) {
-    <div id="auctions" class="col-sm-4 mb-4">
-        @{
-            await Html.RenderPartialAsync("Auction", item);
-        }
+    auctionId = "auction" + item.auction.id;
+
+    <div id="@auctionId" class="col-sm-4 mb-4">
+        @{ await Html.RenderPartialAsync("Auction", item); }
     </div>
 }
