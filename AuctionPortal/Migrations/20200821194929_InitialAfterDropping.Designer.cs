@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuctionPortal.Migrations
 {
     [DbContext(typeof(AuctionPortalContext))]
-    [Migration("20200816183812_OrderTableChanges")]
-    partial class OrderTableChanges
+    [Migration("20200821194929_InitialAfterDropping")]
+    partial class InitialAfterDropping
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,8 +28,8 @@ namespace AuctionPortal.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("accession")
-                        .HasColumnType("int");
+                    b.Property<double>("accession")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("closingDateTime")
                         .HasColumnType("datetime2");
@@ -51,8 +51,8 @@ namespace AuctionPortal.Migrations
                     b.Property<DateTime>("openingDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("startingPrice")
-                        .HasColumnType("int");
+                    b.Property<double>("startingPrice")
+                        .HasColumnType("float");
 
                     b.Property<int>("state")
                         .HasColumnType("int");
@@ -72,8 +72,10 @@ namespace AuctionPortal.Migrations
 
             modelBuilder.Entity("AuctionPortal.Models.Database.Bid", b =>
                 {
-                    b.Property<int>("userId")
-                        .HasColumnType("int");
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("auctionId")
                         .HasColumnType("int");
@@ -81,14 +83,14 @@ namespace AuctionPortal.Migrations
                     b.Property<DateTime>("bidTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("userId1")
+                    b.Property<string>("userId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("userId", "auctionId");
+                    b.HasKey("id");
 
                     b.HasIndex("auctionId");
 
-                    b.HasIndex("userId1");
+                    b.HasIndex("userId");
 
                     b.ToTable("bids");
                 });
@@ -293,15 +295,15 @@ namespace AuctionPortal.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c2073972-6298-4c6e-980c-b8cff125f960",
-                            ConcurrencyStamp = "345118f8-e221-481e-a083-01e5521cfdb7",
+                            Id = "266bf50a-e6ee-43a4-832c-975a59036cca",
+                            ConcurrencyStamp = "32586cb0-0df3-4c60-8176-cfb4bf80a507",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "e8ea69a3-53ea-476b-a3ed-f8baf9cec940",
-                            ConcurrencyStamp = "57cbf06e-296b-4334-8b7a-886db9ee8c47",
+                            Id = "4891f792-3e5c-4966-b704-f18fafb2c75c",
+                            ConcurrencyStamp = "9f200f4f-35db-4547-82e9-914c127347e7",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         });
@@ -436,7 +438,7 @@ namespace AuctionPortal.Migrations
 
                     b.HasOne("AuctionPortal.Models.Database.User", "user")
                         .WithMany()
-                        .HasForeignKey("userId1");
+                        .HasForeignKey("userId");
                 });
 
             modelBuilder.Entity("AuctionPortal.Models.Database.Order", b =>

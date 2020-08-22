@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AuctionPortal.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialAfterDropping : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -43,7 +43,8 @@ namespace AuctionPortal.Migrations
                     firstName = table.Column<string>(nullable: false),
                     lastName = table.Column<string>(nullable: false),
                     gender = table.Column<string>(nullable: false),
-                    tokens = table.Column<int>(nullable: false)
+                    tokens = table.Column<int>(nullable: false),
+                    active = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -190,8 +191,7 @@ namespace AuctionPortal.Migrations
                 {
                     id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    userId = table.Column<int>(nullable: false),
-                    userId1 = table.Column<string>(nullable: false),
+                    userId = table.Column<string>(nullable: false),
                     date = table.Column<DateTime>(nullable: false),
                     tokenAmmout = table.Column<int>(nullable: false),
                     price = table.Column<int>(nullable: false)
@@ -200,8 +200,8 @@ namespace AuctionPortal.Migrations
                 {
                     table.PrimaryKey("PK_orders", x => x.id);
                     table.ForeignKey(
-                        name: "FK_orders_AspNetUsers_userId1",
-                        column: x => x.userId1,
+                        name: "FK_orders_AspNetUsers_userId",
+                        column: x => x.userId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -216,12 +216,13 @@ namespace AuctionPortal.Migrations
                     name = table.Column<string>(nullable: false),
                     description = table.Column<string>(nullable: false),
                     imageId = table.Column<int>(nullable: false),
-                    startingPrice = table.Column<int>(nullable: false),
+                    userId = table.Column<string>(nullable: false),
+                    startingPrice = table.Column<double>(nullable: false),
                     creationDateTime = table.Column<DateTime>(nullable: false),
                     openingDateTime = table.Column<DateTime>(nullable: false),
                     closingDateTime = table.Column<DateTime>(nullable: false),
                     state = table.Column<int>(nullable: false),
-                    accession = table.Column<int>(nullable: false)
+                    accession = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -232,20 +233,27 @@ namespace AuctionPortal.Migrations
                         principalTable: "images",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_auctions_AspNetUsers_userId",
+                        column: x => x.userId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "bids",
                 columns: table => new
                 {
-                    userId = table.Column<int>(nullable: false),
+                    id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    userId = table.Column<string>(nullable: true),
                     auctionId = table.Column<int>(nullable: false),
-                    userId1 = table.Column<string>(nullable: true),
                     bidTime = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_bids", x => new { x.userId, x.auctionId });
+                    table.PrimaryKey("PK_bids", x => x.id);
                     table.ForeignKey(
                         name: "FK_bids_auctions_auctionId",
                         column: x => x.auctionId,
@@ -253,8 +261,8 @@ namespace AuctionPortal.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_bids_AspNetUsers_userId1",
-                        column: x => x.userId1,
+                        name: "FK_bids_AspNetUsers_userId",
+                        column: x => x.userId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -265,8 +273,8 @@ namespace AuctionPortal.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "aa3733e5-c4de-4f74-a4bc-1ac57cf2d6ed", "cee655ff-fdb6-46e1-957e-1cbbe2f93182", "User", "USER" },
-                    { "8f890a4e-571a-4c5c-8046-f6730a8920e7", "4ef69dc8-726f-4f71-a067-a21368bead64", "Administrator", "ADMINISTRATOR" }
+                    { "266bf50a-e6ee-43a4-832c-975a59036cca", "32586cb0-0df3-4c60-8176-cfb4bf80a507", "User", "USER" },
+                    { "4891f792-3e5c-4966-b704-f18fafb2c75c", "9f200f4f-35db-4547-82e9-914c127347e7", "Administrator", "ADMINISTRATOR" }
                 });
 
             migrationBuilder.InsertData(
@@ -324,19 +332,24 @@ namespace AuctionPortal.Migrations
                 column: "imageId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_auctions_userId",
+                table: "auctions",
+                column: "userId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_bids_auctionId",
                 table: "bids",
                 column: "auctionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_bids_userId1",
+                name: "IX_bids_userId",
                 table: "bids",
-                column: "userId1");
+                column: "userId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_orders_userId1",
+                name: "IX_orders_userId",
                 table: "orders",
-                column: "userId1");
+                column: "userId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -372,10 +385,10 @@ namespace AuctionPortal.Migrations
                 name: "auctions");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "images");
 
             migrationBuilder.DropTable(
-                name: "images");
+                name: "AspNetUsers");
         }
     }
 }
