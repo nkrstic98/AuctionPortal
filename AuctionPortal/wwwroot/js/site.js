@@ -3,6 +3,10 @@
 
 // Write your JavaScript code.
 
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
 var connection =  new signalR.HubConnectionBuilder().withUrl("/update").build();
 
 function handleError(error) {
@@ -10,6 +14,12 @@ function handleError(error) {
 }
 
 connection.start().catch(handleError);
+
+setInterval(function() {
+    $.ajax({
+        url: "/Auction/openAuctions"
+    })
+}, 60 * 1000);
 
 function filter() {
     var auctionName = $("#auctionName").val();
@@ -26,6 +36,7 @@ function filter() {
             "minPrice": minPrice,
             "maxPrice": maxPrice,
             "state": auctionState,
+            "currPage": 1,
             "__RequestVerificationToken": verificationToken
         },
         dataType: "text",
@@ -41,6 +52,32 @@ function filter() {
         }
     }
     )
+
+    
+    $.ajax({
+        type: "POST",
+        url: "/Auction/Search",
+        data: {
+            "name": auctionName,
+            "minPrice": minPrice,
+            "maxPrice": maxPrice,
+            "state": auctionState,
+            "currPage": newPage,
+            "second": true,
+            "__RequestVerificationToken": verificationToken
+        },
+        dataType: "text",
+        success: function(response) {
+            for(let i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i].interval);
+            }
+            intervals = [];
+            $("#pagination").html(response);
+        },
+        error: function(response) {
+            alert(response);
+        }
+    });
 }
 
 function closeAuction(auctionId) {
@@ -141,6 +178,78 @@ function bid(auctionId) {
             alert(response);
         }
     })
+}
+
+var curPage = 1, newPage = 1;
+
+function changePage(pageNum, numPages) {
+    var verificationToken = $("input[name='__RequestVerificationToken']").val();
+
+    if(pageNum == 0) {
+        curPage = newPage;
+        newPage--;
+    }
+    else {
+        if(pageNum == numPages + 1) {
+            curPage = newPage;
+            newPage++;
+        }
+        else {
+            if(newPage != 1) curPage = newPage;
+            newPage = pageNum;
+        }
+    }
+
+    newCur = "#page" + newPage;
+    oldCur = "#page" + curPage;
+
+    $(oldCur).toggleClass("active");
+    $(newCur).toggleClass("active");
+
+    if(newPage == 1) {
+        $("#pagePrev").toggleClass("disabled");
+    }
+
+    if(newPage != 1 && curPage == 1) {
+        $("#pagePrev").toggleClass("disabled")
+    }
+
+    if(newPage == numPages) {
+        $("#pageNext").toggleClass("disabled");
+    }
+
+    if(curPage == numPages && newPage < numPages) {
+        $("#pageNext").toggleClass("disabled");
+    }
+
+    var auctionName = $("#auctionName").val();
+    var minPrice = $("#minPrice").val();
+    var maxPrice = $("#maxPrice").val();
+    var auctionState = $("#auctionState").val();
+
+    $.ajax({
+        type: "POST",
+        url: "/Auction/Search",
+        data: {
+            "name": auctionName,
+            "minPrice": minPrice,
+            "maxPrice": maxPrice,
+            "state": auctionState,
+            "currPage": newPage,
+            "__RequestVerificationToken": verificationToken
+        },
+        dataType: "text",
+        success: function(response) {
+            for(let i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i].interval);
+            }
+            intervals = [];
+            $("#auctions").html(response);
+        },
+        error: function(response) {
+            alert(response);
+        }
+    });
 }
 
 connection.on (

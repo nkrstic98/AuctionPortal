@@ -7,6 +7,9 @@ namespace AuctionPortal.Models.View {
         public string minPrice { get; set; }
         public string maxPrice { get; set; }
         public string state { get; set; }
+        public int numPages { get; set; }
+        public int currPage { get; set; }
+        public bool second { get; set; }
 
         public IList<AuctionView> auctionList { get; set; }
     }

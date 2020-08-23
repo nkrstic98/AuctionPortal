@@ -13,20 +13,48 @@
 @{
     string timerId = "timer" + Model.auction.id;
     string auctionId = "auction" + Model.auction.id;
+
+    double price = Model.auction.startingPrice + Model.auction.accession;
 }
 
-<div class="card text-center">
-    <div class="card-header"><a asp-action="Details" asp-route-id="@Model.auction.id">@Model.auction.name</a></div>
-    <div class="card-body">
-        <img src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
-        <h4 id="@timerId">@Model.remainingTime</h4>
-        <h4>$ @Model.auction.accession</h4>
-        <!--Dodati korisnika koji je poslednji licitirao-->
+@if(Model.open) {
+    <div class="card text-center">
+        <div class="card-header">
+            <a data-toggle="tooltip" title="Click for details!" style="font-size: large;" asp-action="Details" asp-route-id="@Model.auction.id">@Model.auction.name</a>
+        </div>
+        <div class="card-body">
+            <img src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
+            <h4 id="@timerId">@Model.remainingTime</h4>
+            <h4>$ @price</h4>
+            @if(Model.auction.biddingList != null && Model.auction.biddingList.Any()) {
+                <h5>@Model.auction.biddingList.Last().user.UserName</h5>
+            }
+        </div>
+        @if(SignInManager.IsSignedIn(User)) {
+            <div class="card-footer"><button class="btn btn-warning" onclick="bid(@Model.auction.id)">BID</button></div>
+        }
     </div>
-    @if(SignInManager.IsSignedIn(User)) {
-        <div class="card-footer"><button class="btn btn-warning" onclick="bid(@Model.auction.id)">BID</button></div>
-    }
-</div>
+}
+else {
+    <div class="card text-center">
+        <div class="card-header">
+            <a data-toggle="tooltip" title="Click for details!" style="font-size: large;" asp-action="Details" asp-route-id="@Model.auction.id">@Model.auction.name</a>
+        </div>
+        <div class="card-body">
+            <img src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
+            @if(Model.auction.biddingList != null && Model.auction.biddingList.Any()) {
+                <h4>SOLD</h4>
+                <h4>$ @price</h4>
+                <h5>WINNER: @Model.auction.biddingList.Last().user.UserName</h5>
+            }
+            else {
+                <h4>EXPIRED</h4>
+                <h4>$ @price</h4>
+            }
+        </div>
+        <div class="card-footer"></div>
+    </div>
+}
 
 <script>
     v = setInterval(function() {

@@ -57,6 +57,12 @@
 
 <div class="row" id="auctions">
     @{
-        await Html.RenderPartialAsync("AuctionList", Model.auctionList);
+        await Html.RenderPartialAsync("AuctionList", Model);
+    }
+</div>
+
+<div class="row" id="pagination">
+    @{
+        await Html.RenderPartialAsync("Pagination", Model);
     }
 </div>
