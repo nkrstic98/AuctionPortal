@@ -14452,6 +14452,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\Auction\\MyAuctionDetails.cshtml",
+      "TargetPath": "Views\\Auction\\MyAuctionDetails.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\Shared\\User.cshtml",
       "TargetPath": "Views\\Shared\\User.cshtml",
       "FileKind": "mvc"
@@ -14499,6 +14504,11 @@
     {
       "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\User\\AccDetails.cshtml",
       "TargetPath": "Views\\User\\AccDetails.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "c:\\Users\\Nikola\\Desktop\\AuctionPortal\\Views\\User\\TokenOrders.cshtml",
+      "TargetPath": "Views\\User\\TokenOrders.cshtml",
       "FileKind": "mvc"
     },
     {

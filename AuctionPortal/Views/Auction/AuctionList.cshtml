@@ -11,7 +11,7 @@
 @foreach (var item in Model.auctionList) {
     auctionId = "auction" + item.auction.id;
 
-    <div id="@auctionId" class="col-sm-4 mb-4">
+    <div id="@auctionId" class="col-sm-4 mb-4 justify-content-center">
         @{ await Html.RenderPartialAsync("Auction", item); }
     </div>
 }

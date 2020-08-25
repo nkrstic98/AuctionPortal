@@ -1,0 +1,70 @@
+@model AuctionPortal.Models.View.AuctionView;
+
+@{
+    ViewData["Title"] = "Details";
+
+    double currentPrice = Model.auction.startingPrice + Model.auction.accession;
+}
+
+<h1>
+    Details
+</h1>
+
+@if(Model.auction.state == AuctionPortal.Models.Database.Auction.AuctionState.SOLD) {
+    <br>
+    <h2>SOLD FOR @currentPrice $</h2>
+}
+
+<div>
+    <hr />
+    <br>
+    <img src="data:image/png;base64,@Model.base64Data" class="img-fluid" style="float: right; height: 300px; width: 300px"/>
+    <dl class="row">
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.name)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.name)
+        </dd>
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.description)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.description)
+        </dd>
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.openingDateTime)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.openingDateTime)
+        </dd>
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.closingDateTime)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.closingDateTime)
+        </dd>
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.state)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.state)
+        </dd>
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.startingPrice)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.startingPrice)
+        </dd>
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.auction.accession)
+        </dt>
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.auction.accession)
+        </dd>
+    </dl>
+</div>
+<br>
+<div>
+    <a asp-action="MyAuctions" class="ml-3">Back to List</a>
+</div>

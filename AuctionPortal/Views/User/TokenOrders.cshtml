@@ -1,0 +1,49 @@
+@model AuctionPortal.Models.View.SearchModel;
+
+<div class="col-sm-12">
+    <table class="table table-sm text-center">
+        <thead class="thead-light">
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Ammount</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.orders)
+            {
+                <tr>
+                    <td>@item.id</td>
+                    <td>@item.date</td>
+                    <td>@item.tokenAmmout</td>
+                    <td>@item.price $</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<br>
+<br>
+
+@if(Model.numPages > 1) {
+
+    <div class="col-sm-12">
+        <ul class="pagination justify-content-center">
+                @{
+                    string li_class = "";
+                    for(int i = 0; i < Model.numPages; i++) {
+                        li_class = "page-item";
+                        if(i + 1 == Model.currPage) {
+                            li_class += " active";
+                        }
+                        int pageNum = i + 1;
+                        string id = "page" + pageNum.ToString();
+                        <li id="@id" class="@li_class"><button class="page-link" onclick="getTokenOrders(@pageNum)">@pageNum</button></li>
+                    }
+                }
+            </ul>
+    </div>
+
+}

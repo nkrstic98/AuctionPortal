@@ -12,8 +12,6 @@
 
 <hr>
 
-
-
 <div class="row">
     <div class="col-sm-6">
         <table class="table table-borderless">
@@ -44,7 +42,31 @@
                 </tr>
             </tbody>
         </table>
-        <br>
         <a asp-controller="User" asp-action="ChangeDetails" class="btn btn-info">Change Account Details</a>
     </div>
+</div>
+
+<hr>
+
+<div class="row">
+    <div class="col-sm-6 text-right mt-2">
+        <a href="#tokenOrders" class="btn btn-success" onclick="getTokenOrders(1)">Show token orders</a>
+    </div>
+    <div class="col-sm-6 mt-2">
+        <a href="#wonAuctions" class="btn btn-success" onclick="filter(true)">Show Won Auctions</a>
+    </div>
+</div>
+
+<br>
+
+<div id="tokenOrders" class="row">
+
+</div>
+
+<div id="auctions" class="row">
+
+</div>
+
+<div id="pagination" class="row">
+
 </div>

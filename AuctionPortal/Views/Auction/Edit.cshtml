@@ -4,6 +4,10 @@
     ViewData["Title"] = "Edit";
 }
 
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
+
 <h1 class="display-4">Edit Auction Details</h1>
 <hr />
 <div class="row">
@@ -26,15 +30,6 @@
                     <label asp-for="file" class="control-label custom-file-label"></label>
                     <input asp-for="file" class="form-control custom-file-input">
                     <span asp-validation-for="file" class="text-danger"></span>
-                    @section scripts {
-                        <script>
-                        // Add the following code if you want the name of the file appear on select
-                        $(".custom-file-input").on("change", function() {
-                        var fileName = $(this).val().split("\\").pop();
-                        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-                        });
-                        </script>
-                    }
                 </div>
             </div>
             <div class="form-group">

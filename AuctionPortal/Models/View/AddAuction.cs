@@ -1,11 +1,13 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionPortal.Models.View {
     public class AddAuctionModel {
         [Required]
         [Display(Name = "Name")]
+        [Remote(controller: "Auction", action: "ValidateAuctionName")]
         public string name { get; set; }
         
         [Required]

@@ -60,7 +60,8 @@ namespace AuctionPortal.Controllers
             IList<Auction> list = await auctionPortalContext
                 .Where(a => a.state == Auction.AuctionState.OPEN)
                 .OrderByDescending(a => a.creationDateTime)
-                .Take(1)
+                .Take(12)
+                .Include(u => u.user)
                 .Include(a => a.biddingList)
                 .ThenInclude(a => a.user)
                 .ToListAsync();
@@ -90,7 +91,7 @@ namespace AuctionPortal.Controllers
 
             SearchModel searchModel = new SearchModel() {
                 auctionList = auctionList,
-                numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(auctionPortalContext.Where(a => a.state == Auction.AuctionState.OPEN).Count() / 1))),
+                numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(auctionPortalContext.Where(a => a.state == Auction.AuctionState.OPEN).Count() / 12.0))),
                 currPage = 1
             };
 
@@ -104,46 +105,75 @@ namespace AuctionPortal.Controllers
         {
             IQueryable<Auction> query = this._context.auctions;
 
-            if(model.name != null) {
-                Console.WriteLine(model.name);
-                query = query.Where(auction => auction.name.ToLower().Contains(model.name));
-            }
+            IList<Auction> auctions;
+            double numAuctions;
 
-            if(model.minPrice != null) {
-                query = query.Where(auction => auction.startingPrice + auction.accession >= int.Parse(model.minPrice));
-            }
+            if(!model.wonAuctions) {
 
-            if(model.maxPrice != null) {
-                query = query.Where(auction => auction.startingPrice + auction.accession <= int.Parse(model.maxPrice));
-            }
-
-            if(model.state != null) {
-                switch(model.state)
-                {
-                    case "1": query = query.Where(auction => auction.state == Auction.AuctionState.DRAFT);
-                            break;
-                    case "2": query = query.Where(auction => auction.state == Auction.AuctionState.READY);
-                            break;
-                    case "3": query = query.Where(auction => auction.state == Auction.AuctionState.OPEN);
-                            break;
-                    case "4": query = query.Where(auction => auction.state == Auction.AuctionState.SOLD);
-                            break;
-                    case "5": query = query.Where(auction => auction.state == Auction.AuctionState.EXPIRED);
-                            break;
-                    case "6": query = query.Where(auction => auction.state == Auction.AuctionState.DELETED);
-                            break;
+                if(model.name != null) {
+                    Console.WriteLine(model.name);
+                    query = query.Where(auction => auction.name.ToLower().Contains(model.name));
                 }
+
+                if(model.minPrice != null) {
+                    query = query.Where(auction => auction.startingPrice + auction.accession >= int.Parse(model.minPrice));
+                }
+
+                if(model.maxPrice != null) {
+                    query = query.Where(auction => auction.startingPrice + auction.accession <= int.Parse(model.maxPrice));
+                }
+
+                if(model.state != null) {
+                    switch(model.state)
+                    {
+                        case "1": query = query.Where(auction => auction.state == Auction.AuctionState.DRAFT);
+                                break;
+                        case "2": query = query.Where(auction => auction.state == Auction.AuctionState.READY);
+                                break;
+                        case "3": query = query.Where(auction => auction.state == Auction.AuctionState.OPEN);
+                                break;
+                        case "4": query = query.Where(auction => auction.state == Auction.AuctionState.SOLD);
+                                break;
+                        case "5": query = query.Where(auction => auction.state == Auction.AuctionState.EXPIRED);
+                                break;
+                        case "6": query = query.Where(auction => auction.state == Auction.AuctionState.DELETED);
+                                break;
+                    }
+                }
+
+                numAuctions = query.Count();
+
+                auctions = await query
+                    .OrderByDescending(auction => auction.openingDateTime)
+                    .Skip((model.currPage - 1) * 12)
+                    .Take(12)
+                    .Include(u => u.user)
+                    .Include(a => a.biddingList)
+                    .ThenInclude(u => u.user)
+                    .ToListAsync();
+
             }
+            else {
+                User loggedInUser = await this.userManager.GetUserAsync(base.User);
 
-            double numAuctions = query.Count();
+                IList<Auction> auctionList = this._context.auctions
+                    .Where(a => a.state == Auction.AuctionState.SOLD)
+                    .Include(u => u.user)
+                    .Include(a => a.biddingList)
+                    .ThenInclude(u => u.user)
+                    .ToList();
 
-            IList<Auction> auctions = await query
-                .OrderByDescending(auction => auction.openingDateTime)
-                .Skip((model.currPage - 1) * 12)
-                .Take(12)
-                .Include(a => a.biddingList)
-                .ThenInclude(u => u.user)
-                .ToListAsync();
+                auctions = new List<Auction>();
+
+                foreach (var item in auctionList)
+                {
+                    if(item.biddingList.Last().userId == loggedInUser.Id) {
+                        auctions.Add(item);
+                    }
+                }
+
+                numAuctions = auctions.Count;
+            }
 
             IList<AuctionView> auctionViews = new List<AuctionView>();
 
@@ -169,7 +199,7 @@ namespace AuctionPortal.Controllers
                 auctionViews.Add(av);
             }
 
-            Console.WriteLine(numAuctions);
+            Console.WriteLine("Number of auctions " + numAuctions);
             Console.WriteLine(Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numAuctions / 12.0))));
 
             SearchModel searchModel = new SearchModel() {
@@ -216,6 +246,7 @@ namespace AuctionPortal.Controllers
 
             var auction = await _context.auctions
                 .Where(m => m.id == auctionId)
+                .Include(u => u.user)
                 .Include(a => a.biddingList)
                 .ThenInclude(u => u.user)
                 .FirstOrDefaultAsync();
@@ -229,18 +260,16 @@ namespace AuctionPortal.Controllers
 
             AuctionView auctionView = await this.GetImageView(auction.imageId);
 
-            if(DateTime.Compare(auction.closingDateTime, DateTime.Now) < 0) {
-                auctionView.remainingTime = "00:00:00";
-                if(auction.state != Auction.AuctionState.EXPIRED && auction.state != Auction.AuctionState.SOLD) {
-                    await this.closeAuction(auction.id);
-                }
-                auctionView.open = false;
+            if(DateTime.Compare(auction.closingDateTime, DateTime.Now) < 0 && auction.state == Auction.AuctionState.OPEN) {
+                await this.closeAuction(auction.id);
             }
             else {
                 TimeSpan diff = auction.closingDateTime - DateTime.Now;
                 auctionView.remainingTime = this.GetRemainingTime(diff);
-                auctionView.open = true;
             }
+
+            if(auction.state == Auction.AuctionState.OPEN) auctionView.open = true;
+            else auctionView.open = false;
 
             auctionView.auction = auction;
 
@@ -251,6 +280,7 @@ namespace AuctionPortal.Controllers
         public async Task<IActionResult> GetDetails(int auctionId) {
             Auction auction = await this._context.auctions
                 .Where(a => a.id == auctionId)
+                .Include(u => u.user)
                 .Include(a => a.biddingList)
                 .ThenInclude(u => u.user)
                 .FirstOrDefaultAsync();
@@ -277,6 +307,23 @@ namespace AuctionPortal.Controllers
             return PartialView("AuctionDetails", data);
         }
 
+        public IActionResult ValidateAuctionName(int? id, string name) {
+            Console.WriteLine("Usao sam u metodu");
+            IQueryable<Auction> query = this._context.auctions.Where(auction => auction.name == name);
+
+            if(id != null) {
+                query = query.Where(auction => auction.id != id);
+            }
+
+            bool exists = query.Any();
+            if(!exists) {
+                return Json(true);
+            }
+            else {
+                return Json("Auction name is already taken");
+            }
+        }
+
         // GET: Auction/Create
         public IActionResult Create()
         {
@@ -292,18 +339,6 @@ namespace AuctionPortal.Controllers
         {
             if(!ModelState.IsValid) {
                 return View(model);
-            }
-
-            IList<Auction> auctions = await this._context.auctions.Where(a => a.name == model.name).ToListAsync();
-
-            if(auctions != null) {
-                foreach (Auction a in auctions)
-                {
-                    if(a.state != Auction.AuctionState.DELETED)  {
-                        ModelState.AddModelError("", "Auction with that name already exists");
-                        return View(model);
-                    }
-                }
             }
 
             Image image;
@@ -514,11 +549,55 @@ namespace AuctionPortal.Controllers
                 return RedirectToAction(nameof(UserController.Login), "User");
             }
 
-            IList<Auction> auctions = await this._context.auctions.Where(u => u.userId == user.Id).ToListAsync();
+            IList<Auction> auctions = await this._context.auctions.Where(u => u.userId == user.Id)
+            .Include(u => u.user)
+            .Include(a => a.biddingList)
+            .ThenInclude(u => u.user)
+            .OrderByDescending(a => a.creationDateTime)
+            .ToListAsync();
 
-            user = this._context.Users.Where(u => u.Id == user.Id).Include(a => a.auctionList).FirstOrDefault();
+            IList<AuctionView> auctionViews = new List<AuctionView>();
 
-            return View(user);
+            foreach (var item in auctions)
+            {
+                AuctionView auctionView = await GetImageView(item.id);
+
+                if(DateTime.Compare(item.closingDateTime, DateTime.Now) < 0 && item.state == Auction.AuctionState.OPEN) {
+                    await this.closeAuction(item.id);
+                    auctionView.open = false;
+                }
+                else {
+                    TimeSpan diff = item.closingDateTime - DateTime.Now;
+                    auctionView.remainingTime = this.GetRemainingTime(diff);
+                    auctionView.open = true;
+
+                    auctionView.auction = item;
+                }
+
+                auctionViews.Add(auctionView);
+            }
+
+            return View(auctionViews);
+        }
+
+        public async Task<IActionResult> MyAuctionDetails(int? auctionId)
+        {
+            if (auctionId == null)
+            {
+                return NotFound();
+            }
+
+            var auction = await _context.auctions.FirstOrDefaultAsync(m => m.id == auctionId);
+
+            if (auction == null)
+            {
+                return NotFound();
+            }
+
+            AuctionView auctionView = await this.GetImageView(auction.imageId);
+            auctionView.auction = auction;
+
+            return View(auctionView);
         }
 
         [AllowAnonymous]
@@ -629,6 +708,7 @@ namespace AuctionPortal.Controllers
         public async Task<IActionResult> GetAuction(int auctionId) {
             Auction auction = await this._context.auctions
                 .Where(a => a.id == auctionId)
+                .Include(u => u.user)
                 .Include(a => a.biddingList)
                 .ThenInclude(u => u.user)
                 .FirstOrDefaultAsync();

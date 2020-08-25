@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using static AuctionPortal.Models.Database.Auction;
+using AuctionPortal.Models.Database;
 
 namespace AuctionPortal.Models.View {
     public class SearchModel {
@@ -10,7 +10,9 @@ namespace AuctionPortal.Models.View {
         public int numPages { get; set; }
         public int currPage { get; set; }
         public bool second { get; set; }
+        public bool wonAuctions { get; set; }
 
         public IList<AuctionView> auctionList { get; set; }
+        public IList<Order> orders { get; set; }
     }
 }

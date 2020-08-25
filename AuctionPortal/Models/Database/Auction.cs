@@ -13,12 +13,10 @@ namespace AuctionPortal.Models.Database {
         };
 
         [Key]
-        [Remote(controller: "User", action: "ValidateAuctionName", AdditionalFields = nameof(name))]
         public int id { get; set; }
 
         [Required]
         [Display(Name = "Auction")]
-        [Remote(controller: "Book", action: "ValidateAuctionName", AdditionalFields = nameof(id))]
         public string name { get; set; }
 
         [Required]

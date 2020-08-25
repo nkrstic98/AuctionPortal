@@ -300,5 +300,37 @@ namespace AuctionPortal.Controllers {
 
             return PartialView("OrderConfirmation", confirm);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTokenOrders(int pageNum = 1) {
+            Console.WriteLine("Usao sam u metodu");
+
+            User loggedInUser = await this.userManager.GetUserAsync(base.User);
+
+            Console.WriteLine("Prosao sam logovanje");
+
+            IQueryable<Order> query = this.context.orders.Where(o => o.userId == loggedInUser.Id);
+
+            double numOrders = query.Count();
+
+            Console.WriteLine(numOrders);
+
+            if(numOrders == 0) return Json("You have not made any token purchase");
+
+            IList<Order> orders = await query.OrderByDescending(d => d.date)
+                .Skip((pageNum - 1) * 10)
+                .Take(10)
+                .ToListAsync();
+
+            SearchModel searchModel = new SearchModel() {
+                orders = orders,
+                numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numOrders / 12.0))),
+                currPage = pageNum
+            };
+
+            Console.WriteLine("Stigao sam do kraja");
+
+            return PartialView("TokenOrders", searchModel);
+        }
     }
 }
