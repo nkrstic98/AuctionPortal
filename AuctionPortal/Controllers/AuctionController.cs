@@ -71,14 +71,15 @@ namespace AuctionPortal.Controllers
             {
                 AuctionView data = await this.GetImageView(el.imageId);
 
-                if(DateTime.Compare(el.closingDateTime, DateTime.Now) < 0 && el.state != Auction.AuctionState.EXPIRED && el.state != Auction.AuctionState.SOLD) {
-                    data.remainingTime = "00:00:00";
+                if(DateTime.Compare(el.closingDateTime, DateTime.Now) < 0 && el.state == Auction.AuctionState.OPEN) {
                     await this.closeAuction(el.id);
                 }
                 else {
                     TimeSpan diff = el.closingDateTime - DateTime.Now;
                     data.remainingTime = this.GetRemainingTime(diff);
                 }
+
+                el.biddingList = el.biddingList.OrderByDescending(b => b.bidTime).ToList();
 
                 data.auction = el;
 
@@ -134,16 +135,12 @@ namespace AuctionPortal.Controllers
                 }
             }
 
-            if(model.name == null && model.minPrice == null && model.maxPrice == null && model.state == null) {
-                query = query.Where(auction => auction.state == Auction.AuctionState.OPEN);
-            }
-
-            int numAuctions = query.Count();
+            double numAuctions = query.Count();
 
             IList<Auction> auctions = await query
                 .OrderByDescending(auction => auction.openingDateTime)
-                .Skip((model.currPage - 1) * 1)
-                .Take(1)
+                .Skip((model.currPage - 1) * 12)
+                .Take(12)
                 .Include(a => a.biddingList)
                 .ThenInclude(u => u.user)
                 .ToListAsync();
@@ -154,27 +151,30 @@ namespace AuctionPortal.Controllers
             {
                 AuctionView av = await this.GetImageView(a.imageId);
 
-                if(DateTime.Compare(a.closingDateTime, DateTime.Now) < 0) {
-                    if(a.state != Auction.AuctionState.EXPIRED && a.state != Auction.AuctionState.SOLD) {
-                        av.remainingTime = "00:00:00";
-                        await this.closeAuction(a.id);
-                    }
-                    av.open = false;
+                if(DateTime.Compare(a.closingDateTime, DateTime.Now) < 0 && a.state == Auction.AuctionState.OPEN) {
+                    await this.closeAuction(a.id);
                 }
                 else {
                     TimeSpan diff = a.closingDateTime - DateTime.Now;
                     av.remainingTime = this.GetRemainingTime(diff);
-                    av.open = true;
                 }
+
+                if(a.state == Auction.AuctionState.OPEN) av.open = true;
+                else av.open = false;
+
+                a.biddingList = a.biddingList.OrderByDescending(b => b.bidTime).ToList();
 
                 av.auction = a;
 
                 auctionViews.Add(av);
             }
 
+            Console.WriteLine(numAuctions);
+            Console.WriteLine(Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numAuctions / 12.0))));
+
             SearchModel searchModel = new SearchModel() {
                 auctionList = auctionViews,
-                numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numAuctions / 1))),
+                numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numAuctions / 12.0))),
                 currPage = model.currPage
             };
 
@@ -192,7 +192,7 @@ namespace AuctionPortal.Controllers
                 return NotFound();
             }
 
-            var auction = await _context.auctions.FirstOrDefaultAsync(m => m.id == id);
+            var auction = await _context.auctions.Include(a => a.biddingList).ThenInclude(u => u.user).FirstOrDefaultAsync(m => m.id == id);
 
             if (auction == null)
             {
@@ -205,24 +205,76 @@ namespace AuctionPortal.Controllers
             return View(auctionView);
         }
 
-        public async Task<IActionResult> Details(int? id)
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Details(int? auctionId)
         {
-            if (id == null)
+            if (auctionId == null)
             {
                 return NotFound();
             }
 
-            var auction = await _context.auctions.FirstOrDefaultAsync(m => m.id == id);
+            var auction = await _context.auctions
+                .Where(m => m.id == auctionId)
+                .Include(a => a.biddingList)
+                .ThenInclude(u => u.user)
+                .FirstOrDefaultAsync();
 
             if (auction == null)
             {
                 return NotFound();
             }
 
+            auction.biddingList = auction.biddingList.OrderByDescending(b => b.bidTime).ToList();
+
             AuctionView auctionView = await this.GetImageView(auction.imageId);
+
+            if(DateTime.Compare(auction.closingDateTime, DateTime.Now) < 0) {
+                auctionView.remainingTime = "00:00:00";
+                if(auction.state != Auction.AuctionState.EXPIRED && auction.state != Auction.AuctionState.SOLD) {
+                    await this.closeAuction(auction.id);
+                }
+                auctionView.open = false;
+            }
+            else {
+                TimeSpan diff = auction.closingDateTime - DateTime.Now;
+                auctionView.remainingTime = this.GetRemainingTime(diff);
+                auctionView.open = true;
+            }
+
             auctionView.auction = auction;
 
             return View(auctionView);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDetails(int auctionId) {
+            Auction auction = await this._context.auctions
+                .Where(a => a.id == auctionId)
+                .Include(a => a.biddingList)
+                .ThenInclude(u => u.user)
+                .FirstOrDefaultAsync();
+
+            AuctionView data = await this.GetImageView(auction.imageId);
+
+            if(DateTime.Compare(auction.closingDateTime, DateTime.Now) < 0) {
+                data.remainingTime = "00:00:00";
+                if(auction.state != Auction.AuctionState.EXPIRED && auction.state != Auction.AuctionState.SOLD) {
+                    await this.closeAuction(auction.id);
+                }
+                data.open = false;
+            }
+            else {
+                TimeSpan diff = auction.closingDateTime - DateTime.Now;
+                data.remainingTime = this.GetRemainingTime(diff);
+                data.open = true;
+            }
+
+            auction.biddingList = auction.biddingList.OrderByDescending(b => b.bidTime).ToList();
+
+            data.auction = auction;
+
+            return PartialView("AuctionDetails", data);
         }
 
         // GET: Auction/Create
@@ -411,7 +463,9 @@ namespace AuctionPortal.Controllers
                 try
                 {
                     Auction auction = await this._context.auctions.FirstOrDefaultAsync(a => a.id == id);
+
                     auction.state = Auction.AuctionState.DELETED;
+                    Console.WriteLine(auction.state);
 
                     _context.Update(auction);
                     await _context.SaveChangesAsync();
@@ -514,7 +568,7 @@ namespace AuctionPortal.Controllers
             }
 
             this._context.auctions.Update(auction);
-            this._context.SaveChanges();
+            await this._context.SaveChangesAsync();
 
             return await this.GetAuction(auctionId);
         }
@@ -525,6 +579,10 @@ namespace AuctionPortal.Controllers
             Auction auction = await this._context.auctions.FirstOrDefaultAsync(a => a.id == auctionId);
             User user = await this.userManager.GetUserAsync(base.User);
 
+            if(auction.user == user) {
+                return Json("You cannot bid on your own auction");
+            }
+
             if(user.tokens == 0) {
                 return Json("You do not have tokens, so you cannot bid on this auction");
             }
@@ -533,8 +591,15 @@ namespace AuctionPortal.Controllers
 
             auction.accession += auction.startingPrice * 0.1;
 
-            TimeSpan diff = DateTime.Now - auction.closingDateTime;
-            if(diff.TotalSeconds <= 10) auction.closingDateTime = auction.closingDateTime.AddSeconds(10.0 - auction.closingDateTime.Second);
+            TimeSpan diff = auction.closingDateTime - DateTime.Now;
+            Console.WriteLine("Total difference in time is " + diff);
+            if(diff.TotalSeconds <= 10.0) {
+                Console.WriteLine("Total difference in time is " + diff);
+                auction.closingDateTime = auction.closingDateTime.AddSeconds(10 - diff.TotalSeconds + 1);
+                Console.WriteLine(auction.closingDateTime);
+            }
+
+            Console.WriteLine(auction.closingDateTime);
 
             Bid bid = new Bid() {
                 userId = user.Id,
@@ -560,6 +625,7 @@ namespace AuctionPortal.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAuction(int auctionId) {
             Auction auction = await this._context.auctions
                 .Where(a => a.id == auctionId)
@@ -569,18 +635,18 @@ namespace AuctionPortal.Controllers
 
             AuctionView data = await this.GetImageView(auction.imageId);
 
-            if(DateTime.Compare(auction.closingDateTime, DateTime.Now) < 0) {
-                data.remainingTime = "00:00:00";
-                if(auction.state != Auction.AuctionState.EXPIRED && auction.state != Auction.AuctionState.SOLD) {
-                    await this.closeAuction(auction.id);
-                    data.open = false;
-                }
+            if(auction.state != Auction.AuctionState.OPEN) {
+                data.open = false;
             }
             else {
                 TimeSpan diff = auction.closingDateTime - DateTime.Now;
                 data.remainingTime = this.GetRemainingTime(diff);
                 data.open = true;
             }
+
+            Console.WriteLine("Auction is open == " + data.open);
+
+            auction.biddingList = auction.biddingList.OrderByDescending(b => b.bidTime).ToList();
 
             data.auction = auction;
 

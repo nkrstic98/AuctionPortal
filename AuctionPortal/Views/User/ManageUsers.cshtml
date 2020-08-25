@@ -34,7 +34,7 @@
             <tbody class="text-center">
                 @foreach (var item in Model)
                 {
-                    if(item.UserName != "admin" && item.active == true) {
+                    @if(item.UserName != "admin" && item.active == true) {
                         <tr>
                             <td>
                                 @Html.DisplayFor(modelItem => item.UserName)
@@ -52,8 +52,8 @@
                                 @Html.DisplayFor(modelItem => item.Email)
                             </td>
                             <td>
-                                <form class="form-inline" asp-controller="User" asp-action="DeleteUser" asp-route-id="@item.Id">
-                                    <input type="submit" class="btn btn-danger" value="Delete">
+                                <form id="deleteForm" class="form-inline" asp-controller="User" asp-action="DeleteUser" asp-route-id="@item.Id">
+                                    <input type="submit" class="btn btn-danger" value="Delete" />
                                 </form>
                             </td>
                         </tr>

@@ -1,7 +1,7 @@
 @model AuctionPortal.Models.View.SearchModel;
 
 @if(Model.numPages != 0) {
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="position: absolute; bottom: 3px;">
         <ul class="pagination justify-content-center">
             @if(Model.currPage != 1) { 
                     <li id="pagePrev" class="page-item"><button class="page-link" onclick="changePage(0, @Model.numPages)">Previous</button></li> 

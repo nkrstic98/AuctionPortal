@@ -15,22 +15,34 @@
     string auctionId = "auction" + Model.auction.id;
 
     double price = Model.auction.startingPrice + Model.auction.accession;
+
+    string auctionState = "";
+
+    switch(Model.auction.state)
+    {
+        case Auction.AuctionState.DRAFT: auctionState = "DRAFT"; break;
+        case Auction.AuctionState.DELETED: auctionState = "DELETED"; break;
+        case Auction.AuctionState.SOLD: auctionState = "SOLD"; break;
+        case Auction.AuctionState.EXPIRED: auctionState = "EXPIRED"; break;
+        case Auction.AuctionState.OPEN: auctionState = "OPEN"; break;
+        case Auction.AuctionState.READY: auctionState = "READY"; break;
+    }
 }
 
-@if(Model.open) {
+@if(Model.open && Model.auction.state == Auction.AuctionState.OPEN) {
     <div class="card text-center">
         <div class="card-header">
-            <a data-toggle="tooltip" title="Click for details!" style="font-size: large;" asp-action="Details" asp-route-id="@Model.auction.id">@Model.auction.name</a>
+            <a data-toggle="tooltip" title="Click for details!" style="font-size: large;" asp-action="Details" asp-route-auctionId="@Model.auction.id">@Model.auction.name</a>
         </div>
         <div class="card-body">
-            <img src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
+            <img class="img-fluid" src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
             <h4 id="@timerId">@Model.remainingTime</h4>
             <h4>$ @price</h4>
             @if(Model.auction.biddingList != null && Model.auction.biddingList.Any()) {
-                <h5>@Model.auction.biddingList.Last().user.UserName</h5>
+                <h5>@Model.auction.biddingList.First().user.UserName</h5>
             }
         </div>
-        @if(SignInManager.IsSignedIn(User)) {
+        @if(SignInManager.IsSignedIn(User) && Model.auction.state == Auction.AuctionState.OPEN) {
             <div class="card-footer"><button class="btn btn-warning" onclick="bid(@Model.auction.id)">BID</button></div>
         }
     </div>
@@ -38,18 +50,25 @@
 else {
     <div class="card text-center">
         <div class="card-header">
-            <a data-toggle="tooltip" title="Click for details!" style="font-size: large;" asp-action="Details" asp-route-id="@Model.auction.id">@Model.auction.name</a>
+            <a data-toggle="tooltip" title="Click for details!" style="font-size: large;" asp-action="Details" asp-route-auctionId="@Model.auction.id">@Model.auction.name</a>
         </div>
         <div class="card-body">
             <img src="data:image/png;base64,@Model.base64Data" / style="height: 150px; width: 150px;">
-            @if(Model.auction.biddingList != null && Model.auction.biddingList.Any()) {
+            @if(auctionState == "SOLD") {
                 <h4>SOLD</h4>
                 <h4>$ @price</h4>
-                <h5>WINNER: @Model.auction.biddingList.Last().user.UserName</h5>
+                <h5>WINNER: @Model.auction.biddingList.First().user.UserName</h5>
             }
-            else {
+            else if(auctionState == "EXPIRED") {
                 <h4>EXPIRED</h4>
                 <h4>$ @price</h4>
+                <br>
+            }
+            else {
+                <br>
+                <h4>@auctionState</h4>
+                <br>
+                <br>
             }
         </div>
         <div class="card-footer"></div>
@@ -76,20 +95,21 @@ else {
         if(seconds == 0 && minutes == 0 && hours == 0) {
             closeAuction(@Model.auction.id);
         }
+        else {
+            if ( seconds < 10 ) {
+                seconds = "0" + seconds;
+            }
 
-        if ( seconds < 10 ) {
-            seconds = "0" + seconds;
+            if ( minutes < 10 ) {
+                minutes = "0" + minutes;
+            }
+
+            if ( hours < 10 ) {
+                hours = "0" + hours;
+            }
+
+            $(id).text ( hours + ":" + minutes + ":" + seconds );
         }
-
-        if ( minutes < 10 ) {
-            minutes = "0" + minutes;
-        }
-
-        if ( hours < 10 ) {
-            hours = "0" + hours;
-        }
-
-        $(id).text ( hours + ":" + minutes + ":" + seconds );
     }, 1000);
 
     object = {

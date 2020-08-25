@@ -2,14 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AuctionPortal.Hubs;
 using AuctionPortal.Models.Database;
 using AuctionPortal.Models.View;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuctionPortal.Controllers {
+
     public class UserController : Controller {
         private AuctionPortalContext context;
         private UserManager<User> userManager;
@@ -204,7 +207,7 @@ namespace AuctionPortal.Controllers {
         public async Task<IActionResult> ManageUsers() {
             var userContext = this.context.Users;
 
-            IList<User> users = await userContext.ToListAsync();
+            IList<User> users = await userContext.Include(a => a.auctionList).ToListAsync();
 
             return View(users);
         }
@@ -215,15 +218,24 @@ namespace AuctionPortal.Controllers {
 
                 user.active = false;
 
-                //odraditi brisanje svih aukcija koje je korisnik napravio
-
-                IList<Auction> userAuctions = await this.context.auctions.Where(uid => user.Id == uid.userId).ToListAsync();
+                IList<Auction> userAuctions = await this.context.auctions
+                    .Where(uid => user.Id == uid.userId)
+                    .Include(a => a.biddingList)
+                    .ThenInclude(u => u.user)
+                    .ToListAsync();
 
                 foreach (var item in userAuctions)
                 {
+                    if(item.state == Auction.AuctionState.OPEN) {
+                        foreach (var u in item.biddingList)
+                        {
+                            u.user.tokens++;
+                            this.context.Update(u.user);
+                        }
+                        item.closingDateTime = DateTime.Now;
+                    }
                     item.state = Auction.AuctionState.DELETED;
                     this.context.Update(item);
-                    await this.context.SaveChangesAsync();
                 }
 
                 IdentityResult result = await this.userManager.UpdateAsync(user);
@@ -234,11 +246,14 @@ namespace AuctionPortal.Controllers {
                         ModelState.AddModelError("", error.Description);
                     }
                 }
+
+                await this.context.SaveChangesAsync();
             }
 
             return RedirectToAction ( nameof ( UserController.ManageUsers ) );
         }
 
+        [Authorize]
         public async Task<IActionResult> PurchaseTokens() {
             IList<Token> tokens = await this.context.tokens.ToListAsync();
 

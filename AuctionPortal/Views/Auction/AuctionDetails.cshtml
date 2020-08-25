@@ -1,0 +1,41 @@
+@model AuctionPortal.Models.View.AuctionView;
+
+@{
+    string style_class = "";
+}
+
+<div id="@Model.auction.id" class="col-sm-4">
+    @{ await Html.RenderPartialAsync("Auction", Model); }
+</div>
+<div class="col-sm-2"></div>
+<div class="col-sm-4">
+    <table class="table table-hover text-center">
+        <thead class="thead-light">
+            <tr>
+                <th>
+                    Bidder
+                </th>
+                <th>
+                    Bidding time
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(Model.auction.biddingList.Any()) {
+                for (int i = 0; i < (Model.auction.biddingList.Count > 10 ? 10 : Model.auction.biddingList.Count); i++)
+                {
+                    if(i == 0) { style_class = "table-success"; }
+                    else { style_class = ""; }
+                    <tr class="@style_class">
+                        <td>
+                            @Model.auction.biddingList.ElementAt(i).user.UserName
+                        </td>
+                        <td>
+                            @Model.auction.biddingList.ElementAt(i).bidTime
+                            </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

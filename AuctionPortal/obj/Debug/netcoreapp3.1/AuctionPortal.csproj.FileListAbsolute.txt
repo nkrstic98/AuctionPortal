@@ -425,3 +425,4 @@ C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auctio
 C:\Users\Nikola\Desktop\AuctionPortal\bin\Debug\netcoreapp3.1\libman.json
 C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Shared\SignalRScriptsPartial.cshtml.g.cs
 C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auction\Pagination.cshtml.g.cs
+C:\Users\Nikola\Desktop\AuctionPortal\obj\Debug\netcoreapp3.1\Razor\Views\Auction\AuctionDetails.cshtml.g.cs
