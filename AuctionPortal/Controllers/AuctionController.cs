@@ -26,6 +26,8 @@ namespace AuctionPortal.Controllers
             this.userManager = userManager;
         }
 
+        
+        //Get Image data to be shown on website
         public async Task<AuctionView> GetImageView(int index) {
             IList<Image> images = await this._context.images.ToListAsync();
 
@@ -38,6 +40,7 @@ namespace AuctionPortal.Controllers
             return model;
         }
 
+        //Gets remaining time for open auctions
         public string GetRemainingTime(TimeSpan diff) {
             double seconds = Math.Floor((diff.TotalMilliseconds / 1000) % 60);
             double minutes = Math.Floor((diff.TotalMilliseconds / (1000 * 60)) % 60);
@@ -50,7 +53,7 @@ namespace AuctionPortal.Controllers
             return h + ":" + m + ":" + s;
         }
 
-        // GET: Auction
+        // GET: All open auctions in Index View
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Index()
@@ -98,6 +101,7 @@ namespace AuctionPortal.Controllers
             return View(searchModel);
         }
 
+        //Search for Auctions using provided filters
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
@@ -111,7 +115,6 @@ namespace AuctionPortal.Controllers
             if(!model.wonAuctions) {
 
                 if(model.name != null) {
-                    Console.WriteLine(model.name);
                     query = query.Where(auction => auction.name.ToLower().Contains(model.name));
                 }
 
@@ -199,9 +202,6 @@ namespace AuctionPortal.Controllers
                 auctionViews.Add(av);
             }
 
-            Console.WriteLine("Number of auctions " + numAuctions);
-            Console.WriteLine(Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numAuctions / 12.0))));
-
             SearchModel searchModel = new SearchModel() {
                 auctionList = auctionViews,
                 numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numAuctions / 12.0))),
@@ -215,6 +215,7 @@ namespace AuctionPortal.Controllers
         }
 
         // GET: Auction/AdminDetails/5
+        //Different Views for Admin and regular User
         public async Task<IActionResult> AdminDetails(int? id)
         {
             if (id == null)
@@ -235,6 +236,7 @@ namespace AuctionPortal.Controllers
             return View(auctionView);
         }
 
+        // GET: Auction Details for Regular users
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Details(int? auctionId)
@@ -276,6 +278,7 @@ namespace AuctionPortal.Controllers
             return View(auctionView);
         }
 
+        // GET: Gets called when Real-time Auction state changes
         [AllowAnonymous]
         public async Task<IActionResult> GetDetails(int auctionId) {
             Auction auction = await this._context.auctions
@@ -307,8 +310,8 @@ namespace AuctionPortal.Controllers
             return PartialView("AuctionDetails", data);
         }
 
+        // Check if Auction name is taken
         public IActionResult ValidateAuctionName(int? id, string name) {
-            Console.WriteLine("Usao sam u metodu");
             IQueryable<Auction> query = this._context.auctions.Where(auction => auction.name == name);
 
             if(id != null) {
@@ -453,6 +456,7 @@ namespace AuctionPortal.Controllers
             return View(model);
         }
 
+        // Get View for Admin with all Auctions in DRAFT state
         public async Task<IActionResult> ManageAuctions()
         {
             var auctionPortalContext = _context.auctions;
@@ -461,6 +465,7 @@ namespace AuctionPortal.Controllers
             return View(list);
         }
 
+        //Approve new auctions in DRAFT state -> set to READY state
         public async Task<IActionResult> Approve(int id)
         {
             if (ModelState.IsValid)
@@ -491,6 +496,7 @@ namespace AuctionPortal.Controllers
             }
         }
 
+        //Delete auctions that are not approved -> set to DELETE state
         public async Task<IActionResult> Delete(int id)
         {
             if (ModelState.IsValid)
@@ -500,7 +506,6 @@ namespace AuctionPortal.Controllers
                     Auction auction = await this._context.auctions.FirstOrDefaultAsync(a => a.id == id);
 
                     auction.state = Auction.AuctionState.DELETED;
-                    Console.WriteLine(auction.state);
 
                     _context.Update(auction);
                     await _context.SaveChangesAsync();
@@ -542,6 +547,7 @@ namespace AuctionPortal.Controllers
             return _context.auctions.Any(e => e.id == id);
         }
 
+        //Show me all auctions I created
         public async Task<IActionResult> MyAuctions() {
             User user = await this.userManager.GetUserAsync(base.User);
 
@@ -580,6 +586,7 @@ namespace AuctionPortal.Controllers
             return View(auctionViews);
         }
 
+        //Show me details of my auction
         public async Task<IActionResult> MyAuctionDetails(int? auctionId)
         {
             if (auctionId == null)
@@ -600,40 +607,34 @@ namespace AuctionPortal.Controllers
             return View(auctionView);
         }
 
+        //Gets called every 30s from client AJAX request
+        //Check if any auction is ready to be opened
         [AllowAnonymous]
         public async Task openAuctions() {
-            Console.WriteLine("Auction update ");
+            Console.WriteLine("Auction update " + DateTime.Now);
 
             IList<Auction> auctions = await this._context.auctions.ToListAsync();
-
-            Console.WriteLine(auctions.Count);
-
-            if(auctions == null) {
-                Console.WriteLine("Auctions are null");
-            }
 
             foreach (var a in auctions)
             {
                 if(DateTime.Compare(a.openingDateTime, DateTime.Now) <= 0) {
                     if(a.state == Auction.AuctionState.READY) {
-                        Console.WriteLine("I am opening auction");
+                        Console.WriteLine("I am opening auction " + a.id);
                         a.state = Auction.AuctionState.OPEN;
                         this._context.auctions.Update(a);
                     }
                     if(a.state == Auction.AuctionState.DRAFT) {
-                        Console.WriteLine("I am making auction expired");
+                        Console.WriteLine("I am making auction " + a.id + " expired");
                         a.state = Auction.AuctionState.EXPIRED;
                         this._context.auctions.Update(a);
                     }
-                }
-                else {
-                    Console.WriteLine("Not ready for opening");
                 }
             }
 
             await _context.SaveChangesAsync();
         }
 
+        //Gets called when auction's time runs out
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> closeAuction(int auctionId) {
@@ -671,14 +672,10 @@ namespace AuctionPortal.Controllers
             auction.accession += auction.startingPrice * 0.1;
 
             TimeSpan diff = auction.closingDateTime - DateTime.Now;
-            Console.WriteLine("Total difference in time is " + diff);
-            if(diff.TotalSeconds <= 10.0) {
-                Console.WriteLine("Total difference in time is " + diff);
-                auction.closingDateTime = auction.closingDateTime.AddSeconds(10 - diff.TotalSeconds + 1);
-                Console.WriteLine(auction.closingDateTime);
-            }
 
-            Console.WriteLine(auction.closingDateTime);
+            if(diff.TotalSeconds <= 10.0) {
+                auction.closingDateTime = auction.closingDateTime.AddSeconds(10 - diff.TotalSeconds + 1);
+            }
 
             Bid bid = new Bid() {
                 userId = user.Id,
@@ -703,6 +700,8 @@ namespace AuctionPortal.Controllers
             return Json(true);
         }
 
+        //Gets called as a result of real-time change in auction state
+        //Someone bids on auction, or changes it's state
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAuction(int auctionId) {
@@ -723,8 +722,6 @@ namespace AuctionPortal.Controllers
                 data.remainingTime = this.GetRemainingTime(diff);
                 data.open = true;
             }
-
-            Console.WriteLine("Auction is open == " + data.open);
 
             auction.biddingList = auction.biddingList.OrderByDescending(b => b.bidTime).ToList();
 

@@ -3,30 +3,38 @@
 
 // Write your JavaScript code.
 
+//enable tooltip
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
 });
 
 // Add the following code if you want the name of the file appear on select
-$(".custom-file-input").on("change", function() {
-    var fileName = $(this).val().split("\\").pop();
-    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-    });
+$(".custom-file-input").on(
+    "change", function() {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    }
+);
 
+//create new signalR connection
 var connection =  new signalR.HubConnectionBuilder().withUrl("/update").build();
 
 function handleError(error) {
     alert(error);
 }
 
+//start the connection
 connection.start().catch(handleError);
 
+//AJAX request for opening auctions
+//Gets called every 30s
 setInterval(function() {
     $.ajax({
         url: "/Auction/openAuctions"
     })
 }, 30 * 1000);
 
+//AJAX request for filtering auctions
 function filter(wonAuctions) {
     var auctionName = $("#auctionName").val();
     var minPrice = $("#minPrice").val();
@@ -88,6 +96,8 @@ function filter(wonAuctions) {
     $("#tokenOrders").html("");
 }
 
+//AJAX request for closing auctions
+//Gets called when aution's time runs out
 function closeAuction(auctionId) {
     var verificationToken = $("input[name='__RequestVerificationToken']").val();
 
@@ -114,13 +124,14 @@ function closeAuction(auctionId) {
     })
 }
 
+//AJAX call for reseting all filters
 function noFilters() {
     var verificationToken = $("input[name='__RequestVerificationToken']").val();
 
-    var auctionName = $("#auctionName").val("");
-    var minPrice = $("#minPrice").val("");
-    var maxPrice = $("#maxPrice").val("");
-    var auctionState = $("#auctionState").val("");
+    $("#auctionName").val("");
+    $("#minPrice").val("");
+    $("#maxPrice").val("");
+    $("#auctionState").val("");
 
     $.ajax({
         type: "POST",
@@ -172,6 +183,7 @@ function noFilters() {
     newPage = 1;
 }
 
+//AJAX request for PayPal token purchase
 function purchaseTokens(amount) {
     var verificationToken = $("input[name='__RequestVerificationToken']").val();
 
@@ -192,6 +204,7 @@ function purchaseTokens(amount) {
     })
 }
 
+//AJAX request that gets called when user bids on auction
 function bid(auctionId) {
     auctionID = auctionId;
 
@@ -220,6 +233,7 @@ function bid(auctionId) {
 
 var curPage = 1, newPage = 1;
 
+//add or remove active and disabled classes for pagination list
 function changePageFront(pageNum, numPages) {
     if(pageNum == 0) {
         curPage = newPage;
@@ -259,6 +273,7 @@ function changePageFront(pageNum, numPages) {
     }
 }
 
+//AJAX request for showing different page with auctions
 function changePage(pageNum, numPages) {
     var verificationToken = $("input[name='__RequestVerificationToken']").val();
 
@@ -296,6 +311,7 @@ function changePage(pageNum, numPages) {
     });
 }
 
+//AJAX request that gets all orders made by logged user
 function getTokenOrders(page) {
     $.ajax({
         type: "GET",
@@ -313,10 +329,7 @@ function getTokenOrders(page) {
     $("#pagination").html("");
 }
 
-function getWonAuctions() {
-
-}
-
+//Log out user when closing browser if User == Admin
 window.onbeforeunload = function(evt) {
     var verificationToken = $("input[name='__RequestVerificationToken']").val();
 
@@ -337,6 +350,8 @@ window.onbeforeunload = function(evt) {
     }
 }
 
+//invoke AJAX request for changing Auction View in real-time for all users
+//Gets called when someone bids on auction, or auction gets closed
 connection.on (
     "UpdateAuction",
     (auctionId) => {

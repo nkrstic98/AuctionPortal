@@ -26,6 +26,7 @@ namespace AuctionPortal.Controllers {
             this.signInManager = signInManager;
         }
 
+        //Check username, for registration pursposes
         public IActionResult isEmailUnique(string email)
         {
             bool exists = this.context.Users.Where(user => user.Email == email).Any();
@@ -40,6 +41,7 @@ namespace AuctionPortal.Controllers {
             }
         }
 
+        //Check email, for registration purposes
         public IActionResult isUsernameUnique(string username)
         {
             bool exists = this.context.Users.Where(user => user.UserName == username).Any();
@@ -204,6 +206,7 @@ namespace AuctionPortal.Controllers {
             return RedirectToAction ( nameof ( UserController.AccDetails ) );
         }
 
+        //GET: View for managing users
         public async Task<IActionResult> ManageUsers() {
             var userContext = this.context.Users;
 
@@ -212,6 +215,7 @@ namespace AuctionPortal.Controllers {
             return View(users);
         }
 
+        //Delete user from system -> leaves it in DB, set active status to 0
         public async Task<IActionResult> DeleteUser(string id) {
             if (ModelState.IsValid) {
                 User user = this.context.Users.Where(user => user.Id == id).First();
@@ -260,6 +264,8 @@ namespace AuctionPortal.Controllers {
             return View(tokens);
         }
 
+        //Purchase tokens using PayPal on client side
+        //Update database based on passed data
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PurchaseTokens(Purchase model) {
@@ -301,13 +307,10 @@ namespace AuctionPortal.Controllers {
             return PartialView("OrderConfirmation", confirm);
         }
 
+        //Show all token orders made by logged user
         [HttpGet]
         public async Task<IActionResult> GetTokenOrders(int pageNum = 1) {
-            Console.WriteLine("Usao sam u metodu");
-
             User loggedInUser = await this.userManager.GetUserAsync(base.User);
-
-            Console.WriteLine("Prosao sam logovanje");
 
             IQueryable<Order> query = this.context.orders.Where(o => o.userId == loggedInUser.Id);
 
@@ -327,8 +330,6 @@ namespace AuctionPortal.Controllers {
                 numPages = Decimal.ToInt32(Math.Ceiling(Convert.ToDecimal(numOrders / 12.0))),
                 currPage = pageNum
             };
-
-            Console.WriteLine("Stigao sam do kraja");
 
             return PartialView("TokenOrders", searchModel);
         }
